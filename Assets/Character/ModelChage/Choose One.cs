@@ -3,35 +3,35 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-// -100º¸´Ù ÀÛÀº °ªÀÏ¼ö·Ï ´õ ¸ÕÀú ½ÇÇàµË´Ï´Ù.
+// -100ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ë´Ï´ï¿½.
 [DefaultExecutionOrder(15)]
 public class ChooseOne : MonoBehaviour
 {
-    [Header("UI ÆÐ³Î & ¹öÆ° ÂüÁ¶")]
-    public GameObject selectionPanel;    // ¼±ÅÃÃ¢ ÀüÃ¼ ÆÐ³Î (Canvas ¾Æ·¡¿¡ µÎ°í ºñÈ°¼ºÈ­)
-    public Button steampunkButton;       // ½ºÆÀÆãÅ© ¼±ÅÃ ¹öÆ°
-    public Button runeButton;            // ·é¸¶·Â ¼±ÅÃ ¹öÆ°
+    [Header("UI ï¿½Ð³ï¿½ & ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½")]
+    public GameObject selectionPanel;    // ï¿½ï¿½ï¿½ï¿½Ã¢ ï¿½ï¿½Ã¼ ï¿½Ð³ï¿½ (Canvas ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½Î°ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­)
+    public Button steampunkButton;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å© ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+    public Button runeButton;            // ï¿½é¸¶ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
 
-    [Header("½ºÆÀÆãÅ©/·é¸¶·Â ÇÃ·¹ÀÌ¾î")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å©/ï¿½é¸¶ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½")]
     [SerializeField] private GameObject SteamPunkPlayer;
     [SerializeField] private GameObject MagicPlayer;
 
-    // UIcontoller ¿¬°á
+    // UIcontoller ï¿½ï¿½ï¿½ï¿½
     public GameObject UI;
-    [SerializeField] private InventoryUIController inventory;
+    //[SerializeField] private InventoryUIController inventory;
 
     public bool select = false;
     public bool SystemSteamPunk = false;
     public bool SystemMagic = false;
 
-    // ÀÏ½ÃÁ¤Áö Àü ¹°¸® ¾÷µ¥ÀÌÆ® ÁÖ±â¸¦ ÀúÀåÇÒ º¯¼ö
+    // ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ö±â¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     private float _savedFixedDeltaTime;
 
 
     private SystemSwitch systemswitch;
     [SerializeField] private DashStackUI dashstackUI;
 
-    // ÂüÁ¶
+    // ï¿½ï¿½ï¿½ï¿½
     [SerializeField] private CameraController cameracontroller;
     [SerializeField] private PlayerGoldManager playergoldmanager;
     //[SerializeField] private EnemyAI enemy;
@@ -39,14 +39,14 @@ public class ChooseOne : MonoBehaviour
     private void Awake()
     {
         systemswitch = GetComponent<SystemSwitch>();
-        // °ÔÀÓ ¿ÏÀü Á¤Áö
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         PauseGame();
 
-        // ¼±ÅÃ UI ¶ç¿ì±â
+        // ï¿½ï¿½ï¿½ï¿½ UI ï¿½ï¿½ï¿½ï¿½
         if (selectionPanel != null)
             selectionPanel.SetActive(true);
 
-        // ¹öÆ° ÄÝ¹é ¿¬°á
+        // ï¿½ï¿½Æ° ï¿½Ý¹ï¿½ ï¿½ï¿½ï¿½ï¿½
         steampunkButton.onClick.AddListener(OnSteampunkSelected);
         runeButton.onClick.AddListener(OnRuneSelected);
     }
@@ -62,7 +62,7 @@ public class ChooseOne : MonoBehaviour
         dashstackUI.SteamPunkDash();
         cameracontroller.SetSteamPunktype();
         UI.SetActive(true);
-        inventory.OpenInventory();
+        //inventory.OpenInventory();
         //playergoldmanager.Init();
     }
 
@@ -77,45 +77,45 @@ public class ChooseOne : MonoBehaviour
         dashstackUI.MagicDash();
         cameracontroller.SetMagictype();
         UI.SetActive(true);
-        inventory.OpenInventory();
+        //inventory.OpenInventory();
         //playergoldmanager.Init();
     }
 
     private void StartGame()
     {
-        // UI ¼û±â±â
+        // UI ï¿½ï¿½ï¿½ï¿½ï¿½
         selectionPanel.SetActive(false);
 
-        // °ÔÀÓ Àç°³
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ç°³
         ResumeGame();
 
-        // ¾À ·Îµå³ª °ÔÀÓ ¸Å´ÏÀú ½ÃÀÛ È£Ãâ
+        // ï¿½ï¿½ ï¿½Îµå³ª ï¿½ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
         // SceneManager.LoadScene("MainGame");
         // GameManager.Instance.Begin();
     }
 
     private void PauseGame()
     {
-        // 1) ¹°¸® ÇÁ·¹ÀÓ ÀúÀå ÈÄ 0À¸·Î
+        // 1) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½
         _savedFixedDeltaTime = Time.fixedDeltaTime;
         Time.fixedDeltaTime = 0f;
 
-        // 2) °ÔÀÓ ½Ã°£ Á¤Áö
+        // 2) ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
         Time.timeScale = 0f;
 
-        // 3) ¿Àµð¿Àµµ Á¤Áö
+        // 3) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         AudioListener.pause = true;
     }
 
     private void ResumeGame()
     {
-        // 1) °ÔÀÓ ½Ã°£ º¹±¸
+        // 1) ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
         Time.timeScale = 1f;
 
-        // 2) ¹°¸® ÇÁ·¹ÀÓ º¹±¸
+        // 2) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         Time.fixedDeltaTime = _savedFixedDeltaTime;
 
-        // 3) ¿Àµð¿À Àç»ý Àç°³
+        // 3) ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ç°³
         AudioListener.pause = false;
     }
 }

@@ -23,7 +23,7 @@ public class Attack_Damage : MonoBehaviour
     private float luckstat;
 
     // ===== ���ο��� ����� ���� =====
-    public WeaponStatPackage currentWeaponData;
+    //public WeaponStatPackage currentWeaponData;
     private SteamPressureSystem steampunk;
 
     private void Awake()
@@ -42,18 +42,18 @@ public class Attack_Damage : MonoBehaviour
         BasicstrongUPAttackDamage += StrStat;
         Debug.Log($"�ҿ� ������ ���� ũ��Ƽ�� ������ : {SoulBuffCriticalDamage}, �ҿ� ������ ���� ũ��Ƽ�� Ȯ�� : {SoulBuffCritChance}");*/
         luckstat = Ark_stat.luck;
-        weaponcirdmg = (currentWeaponData.critDamage / 100) - 1; 
-        CritChance = (luckstat * 0.1f) + currentWeaponData.critChance + SoulBuffCritChance; 
-        Debug.Log($"���� �������� ���� ������ {currentWeaponData.attackPower}");
+        //weaponcirdmg = (currentWeaponData.critDamage / 100) - 1; 
+        //CritChance = (luckstat * 0.1f) + currentWeaponData.critChance + SoulBuffCritChance; 
+        //Debug.Log($"���� �������� ���� ������ {currentWeaponData.attackPower}");
     }
 
     // ���� �޼���
     private void AttackWithModifiers(float baseAttackDamage)
     {
         // 1) ���̽� + ���� + MaxHP ������
-        float damage = baseAttackDamage
-                     + MaxHPDamage
-                     + currentWeaponData.attackPower + (Ark_stat.strength * 2);
+        float damage = baseAttackDamage;
+                     //+ MaxHPDamage
+                     //+ currentWeaponData.attackPower + (Ark_stat.strength * 2);
 
         // 2) ���� ���
         damage *= GetBuffMultiplier();
@@ -91,9 +91,9 @@ public class Attack_Damage : MonoBehaviour
 
     private float GetBuffMultiplier()
     {
-        if (TryGetComponent<SoulBuffAttack>(out var buff) && buff.IsBuffActive)
+        //if (TryGetComponent<SoulBuffAttack>(out var buff) && buff.IsBuffActive)
         {
-            return buff.BuffMultiplier;
+            //return buff.BuffMultiplier;
         }
         //Debug.Log("[���� Ȯ��] ���� ������ ���� ��Ȱ��ȭ �� �⺻ ��� 1.0");
         return 1f;
@@ -152,9 +152,9 @@ public class Attack_Damage : MonoBehaviour
         }
     }
 
-    public void SetWeaponStats(WeaponStatPackage stats)
+    public void SetWeaponStats(/*WeaponStatPackage stats*/)
     {
-        currentWeaponData = stats;
+        //currentWeaponData = stats;
     }
     private void OnDrawGizmosSelected()
     {

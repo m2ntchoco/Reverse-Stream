@@ -13,7 +13,7 @@ public class PlayerHealth : MonoBehaviour
     public static float PlayerShield = 0;
     public static float RemainShield = 0;
     public static bool isImmortalNow = false;
-    ApplyDeffenceStatBonus applyDeffenceStatBonus;
+    //ApplyDeffenceStatBonus applyDeffenceStatBonus;
     Die PlayerDie;
 
     [Header("HP 계산식")]
@@ -67,7 +67,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void OnEnable()
     {
-        ManaSystem.OnSkillCast += HandleSkillCast;
+        //ManaSystem.OnSkillCast += HandleSkillCast;
 
         // ★ 스탯 변경에 반응
         Ark_stat.StatsChanged += OnStatsChanged;
@@ -75,7 +75,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void OnDisable()
     {
-        ManaSystem.OnSkillCast -= HandleSkillCast;
+        //ManaSystem.OnSkillCast -= HandleSkillCast;
 
         // ★ 구독 해제
         Ark_stat.StatsChanged -= OnStatsChanged;
@@ -138,7 +138,7 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log($"시발좀{isknockback}");
 
         // 체력이 다 안 찼고, 자동 회복이 꺼져 있다면 다시 시작
-        if (HpGenerate.isRegenerating)
+        //if (HpGenerate.isRegenerating)
         {
             if (currentHP < maxHP && regenCoroutine == null && healbuttonclicked)
             {
@@ -152,24 +152,17 @@ public class PlayerHealth : MonoBehaviour
         //Debug.Log($"체력 : {currentHP}");
         //Debug.Log($"[Update] SoulBClicked: {DamageDiscount.SoulBClicked}, negateNextDamage: {NonDamage.negateNextDamage}");
 
-        if (FindObjectOfType<UINavigator>() != null)
-        {
-            Debug.Log("씬 안에 InventoryBackPanelAdapter 있음");
-        }
-        else
-        {
-            Debug.Log("씬 안에 없음");
-        }
+        
     }
     private void HandleSkillCast(string skillName)
     {
-        if (SoulBuffShield.shieldCanUse && SoulBuffShield.DefenceSClicked)
+        //if (SoulBuffShield.shieldCanUse && SoulBuffShield.DefenceSClicked)
         {
             PlayerShield = MaxHP;
             RemainShield = 10;
             Debug.Log($"플레이어 쉴드: {PlayerShield}, 남은 쉴드: {RemainShield}");
             RemainShield = Mathf.Clamp(RemainShield, 0, PlayerShield); // 범위 보정
-            SoulBuffShield.shieldCanUse = false;
+            //SoulBuffShield.shieldCanUse = false;
             if (hpUI != null)
             {
                 hpUI.SetShield((int)RemainShield, (int)PlayerShield);
@@ -222,9 +215,9 @@ public class PlayerHealth : MonoBehaviour
 
                     if (overflowDamage > 0)
                         currentHP -= overflowDamage;
-                    if (TryGetComponent<SoulBuffAttack>(out var buff))
+                    //if (TryGetComponent<SoulBuffAttack>(out var buff))
                     {
-                        buff.TryActivateBuffAfterHit();
+                        //buff.TryActivateBuffAfterHit();
                     }
 
                 }
@@ -238,7 +231,7 @@ public class PlayerHealth : MonoBehaviour
                     {
                         finaldamage -= RemainShield;
                         RemainShield = 0;
-                        SoulBuffShield.shieldReady = false;
+                        //SoulBuffShield.shieldReady = false;
                         PlayerShield = RemainShield;
                         //Debug.Log($"총 쉴드: {PlayerShield}, 남은 쉴드: {RemainShield}");
                     }
@@ -253,14 +246,14 @@ public class PlayerHealth : MonoBehaviour
                         }
                     }
                 }
-                if (currentHP <= finaldamage && !SoulBuffInvincibility.immortalOnceUsed && SoulBuffInvincibility.Defence6Clicked)
+                //if (currentHP <= finaldamage && !SoulBuffInvincibility.immortalOnceUsed && SoulBuffInvincibility.Defence6Clicked)
                 {
                     StartCoroutine(ImmortalOnceCoroutine());
                 }
                 currentHP -= finaldamage;
-                if (TryGetComponent<SoulBuffAttack>(out var buff))
+                //f (TryGetComponent<SoulBuffAttack>(out var buff))
                 {
-                    buff.TryActivateBuffAfterHit();
+                    //buff.TryActivateBuffAfterHit();
                 }
 
                 // 넉백 처리
@@ -276,11 +269,11 @@ public class PlayerHealth : MonoBehaviour
             }
 
             finaldamage = damage;
-            if (NonDamage.negateNextDamage)
+            //if (NonDamage.negateNextDamage)
             {
                 finaldamage = 0;
-                NonDamage.negateNextDamage = false;
-                NonDamage.isNegateReserved = false; //예약 상태 초기화
+                //NonDamage.negateNextDamage = false;
+                //NonDamage.isNegateReserved = false; //예약 상태 초기화
                 //Debug.Log("무효화 발동!");
                 //Debug.Log($"[DEBUG] 무효화: {NonDamage.negateNextDamage}, 원본 데미지: {damage}, 최종 데미지: {finaldamage}");
                 if (PlayerShield != 0)
@@ -293,10 +286,10 @@ public class PlayerHealth : MonoBehaviour
                     }
                 }
             }
-            else if (!NonDamage.negateNextDamage)
+            //else if (!NonDamage.negateNextDamage)
             {
                 finaldamage = damage;
-                if (DamageDiscount.SoulBClicked)
+                //if (DamageDiscount.SoulBClicked)
                 {
 
                     //Debug.Log("데미지가 감소됩니다.");
@@ -307,7 +300,7 @@ public class PlayerHealth : MonoBehaviour
                         {
                             finaldamage -= RemainShield;
                             RemainShield = 0;
-                            SoulBuffShield.shieldReady = false;
+                            //SoulBuffShield.shieldReady = false;
                             PlayerShield = RemainShield;
                             //Debug.Log($"총 쉴드: {PlayerShield}, 남은 쉴드: {RemainShield}");
                             if (hpUI != null)
@@ -329,9 +322,9 @@ public class PlayerHealth : MonoBehaviour
                 }
             }
             //체력 깎이고 나서 회복 다시 시작 조건
-            if (!HpGenerate.isRegenerating && currentHP < maxHP && healbuttonclicked)
+            //if (!HpGenerate.isRegenerating && currentHP < maxHP && healbuttonclicked)
             {
-                HpGenerate.isRegenerating = true;
+                //HpGenerate.isRegenerating = true;
                 //Debug.Log("[TakeDamage] 체력 감소 → 자동 회복 재시작 조건 충족");
             }
             if (hpUI != null)
@@ -371,7 +364,7 @@ public class PlayerHealth : MonoBehaviour
         isImmortalNow = true;
         StopHealthRegen();
         currentHP = 1;
-        SoulBuffInvincibility.UseImmortalOnce();
+        //SoulBuffInvincibility.UseImmortalOnce();
 
         yield return new WaitForSeconds(5f);
 
@@ -401,7 +394,7 @@ public class PlayerHealth : MonoBehaviour
         {
             StopCoroutine(regenCoroutine);
             regenCoroutine = null;
-            HpGenerate.isRegenerating = false;
+            //HpGenerate.isRegenerating = false;
             //Debug.Log("[PlayerHealth] 체력 자동 회복 중단됨");
         }
     }

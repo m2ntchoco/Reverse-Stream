@@ -6,11 +6,11 @@ using System;
 
 public class PlayerExpManager
 {
-    // ¿ÜºÎ ½Ã½ºÅÛ ÂüÁ¶(´Ù¸¥ ½ºÅ©¸³Æ®¿¡¼­ »ç¿ë)
+    // ï¿½Üºï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½Ù¸ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
     public static PlayerHealth PlayerHealth;
     public static PlayerData PlayerData;
 
-    // ÃÊ±â ÆÄÀÏ »ý¼º½Ã¿¡¸¸ ÂüÁ¶ÇÏ´Â ±âº»°ª(·±Å¸ÀÓ ·ÎÁ÷¿¡ ÀÇÁ¸ X)
+    // ï¿½Ê±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½âº»ï¿½ï¿½(ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ X)
     public static int currentLevel = 1;
     public static int currentExp = 0;
     public static int totalExp = 0;
@@ -18,17 +18,17 @@ public class PlayerExpManager
 
     public static int MaxLevel = 50;
 
-    // UI °»½Å ÀÌº¥Æ®
-    public static event Action OnExpChanged;                             // ´Ü¼ø °»½Å Æ®¸®°Å
+    // UI ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ®
+    public static event Action OnExpChanged;                             // ï¿½Ü¼ï¿½ ï¿½ï¿½ï¿½ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½
     public static event Action<int, int, int> OnExpChangedWithValue;     // (current, max, level)
 
-    // ÇÊ¿ä ¾ø´Ù¸é Á¦°Å °¡´É
-    public UIController uiController;
+    // ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //public UIController uiController;
 
     /// <summary>
-    /// Player_Data.json Á¸Àç À¯¹«¿¡ µû¶ó ½Å±Ô »ý¼º ¶Ç´Â ·Îµå.
-    /// ÀúÀå °ªÀÌ 0/À½¼ö·Î Àß¸ø µé¾î¿Â °æ¿ìµµ ¾ÈÀüÇÏ°Ô º¸Á¤.
-    /// ºÎÆÃ ½ÃÁ¡(Ã¹ ¾À ·Îµå Àü)¿¡ ¹Ýµå½Ã ÇÑ ¹ø È£ÃâµÇµµ·Ï ±¸¼º ±ÇÀå.
+    /// Player_Data.json ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ ï¿½Îµï¿½.
+    /// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 0/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ìµµ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    /// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(Ã¹ ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½)ï¿½ï¿½ ï¿½Ýµï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½Çµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
     /// </summary>
     public static void InitPlayerData()
     {
@@ -42,26 +42,26 @@ public class PlayerExpManager
                 playerExp = Mathf.Max(0, currentExp),
                 soulExp = 0,
                 playerTotalExp = Mathf.Max(0, totalExp),
-                expToNextLevel = Mathf.Max(1, expToNextLevel), // 0 ¹æÁö
+                expToNextLevel = Mathf.Max(1, expToNextLevel), // 0 ï¿½ï¿½ï¿½ï¿½
                 unlockedButtons = new List<string>()
             };
 
             PlayerData = data;
             File.WriteAllText(path, JsonUtility.ToJson(data, true), Encoding.UTF8);
-            Debug.Log("ÃÊ±â Player_Data.json ÆÄÀÏ »ý¼º ¿Ï·á");
+            Debug.Log("ï¿½Ê±ï¿½ Player_Data.json ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½");
         }
         else
         {
-            LoadPlayerData(); // ÀÌ¹Ì ÆÄÀÏ ÀÖÀ¸¸é ·Îµå
+            LoadPlayerData(); // ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
         }
 
-        // UI ÃÊ±â°ª ¹Ý¿µ
+        // UI ï¿½Ê±â°ª ï¿½Ý¿ï¿½
         OnExpChanged?.Invoke();
         OnExpChangedWithValue?.Invoke(PlayerData.playerExp, PlayerData.expToNextLevel, PlayerData.playerLevel);
     }
 
     /// <summary>
-    /// °æÇèÄ¡ È¹µæ
+    /// ï¿½ï¿½ï¿½ï¿½Ä¡ È¹ï¿½ï¿½
     /// </summary>
     public static void AddExp(int amount)
     {
@@ -70,7 +70,7 @@ public class PlayerExpManager
         PlayerData.playerExp += amount;
         PlayerData.playerTotalExp += amount;
 
-        Debug.Log($"°æÇèÄ¡ +{amount}, ÇöÀç °æÇèÄ¡: {PlayerData.playerExp}/{PlayerData.expToNextLevel}, ÃÑ °æÇèÄ¡:{PlayerData.playerTotalExp}");
+        Debug.Log($"ï¿½ï¿½ï¿½ï¿½Ä¡ +{amount}, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡: {PlayerData.playerExp}/{PlayerData.expToNextLevel}, ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡:{PlayerData.playerTotalExp}");
 
         Level_Up();
 
@@ -78,8 +78,8 @@ public class PlayerExpManager
     }
 
     /// <summary>
-    /// ·¹º§¾÷ Ã³¸®(¿©·¯ ·¹º§ µ¿½Ã »ó½Â ¾ÈÀü)
-    /// expToNextLevelÀÌ 0/À½¼ö°¡ µÇ¸é ¹«ÇÑ·çÇÁ°¡ ³ª¹Ç·Î Ç×»ó 1 ÀÌ»óÀ¸·Î º¸Á¤.
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+    /// expToNextLevelï¿½ï¿½ 0/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç·ï¿½ ï¿½×»ï¿½ 1 ï¿½Ì»ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
     /// </summary>
     public static void Level_Up()
     {
@@ -87,11 +87,11 @@ public class PlayerExpManager
 
         if (PlayerData.playerLevel >= MaxLevel) return;
 
-        // Àß¸ø ÀúÀåµÈ °ª ¹æ¾î
+        // ï¿½ß¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
         if (PlayerData.expToNextLevel <= 0)
             PlayerData.expToNextLevel = 100;
 
-        int safety = 0; // ¹«ÇÑ·çÇÁ ¹æÁö
+        int safety = 0; // ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         while (PlayerData.playerExp >= PlayerData.expToNextLevel)
         {
             PlayerData.playerExp -= PlayerData.expToNextLevel;
@@ -100,9 +100,9 @@ public class PlayerExpManager
 
             Ark_stat.remainingStatPoints += 4;
 
-            Debug.Log($"·¹º§¾÷! ÇöÀç ·¹º§ : {PlayerData.playerLevel}");
+            Debug.Log($"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½! ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ : {PlayerData.playerLevel}");
 
-            // »óÇÑ µµ´Þ ½Ã Ãß°¡ ·çÇÁ ¹æÁö
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (PlayerData.playerLevel >= MaxLevel)
             {
                 PlayerData.playerExp = 0;
@@ -112,7 +112,7 @@ public class PlayerExpManager
 
             if (++safety > 1000)
             {
-                Debug.LogError("Level_Up safety break: exp/requirement °ª Á¡°Ë ÇÊ¿ä");
+                Debug.LogError("Level_Up safety break: exp/requirement ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½");
                 break;
             }
         }
@@ -127,42 +127,42 @@ public class PlayerExpManager
 
         if (PlayerData.playerLevel == MaxLevel)
         {
-            Debug.Log($"´ç½ÅÀÇ ·¹º§:{PlayerData.playerLevel} ÃÖ°í ·¹º§:{MaxLevel} ´õ ÀÌ»ó ¿Ã¸± ¼ö ¾ø½À´Ï´Ù.");
+            Debug.Log($"ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½:{PlayerData.playerLevel} ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½:{MaxLevel} ï¿½ï¿½ ï¿½Ì»ï¿½ ï¿½Ã¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
     }
 
     /// <summary>
-    /// »ç¸Á Ã³¸®(¼Ò¿ï °æÇèÄ¡ È¯»ê µî)
+    /// ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½(ï¿½Ò¿ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ È¯ï¿½ï¿½ ï¿½ï¿½)
     /// </summary>
     public static void PlayerDead()
     {
         if (PlayerData == null) InitPlayerData();
 
-        Debug.Log("PlayerDead ÇÔ¼öÈ£Ãâ");
+        Debug.Log("PlayerDead ï¿½Ô¼ï¿½È£ï¿½ï¿½");
 
-        // ÃÑ °æÇèÄ¡ÀÇ 10% + ³ª¸ÓÁö ¹Ý¿Ã¸²
+        // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ 10% + ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¿Ã¸ï¿½
         PlayerData.soulExp += PlayerData.playerTotalExp / 10;
         float semiresult = PlayerData.playerTotalExp % 10;
         int rounded = Mathf.RoundToInt(semiresult);
         PlayerData.soulExp += rounded;
 
-        // ¸®¼Â
+        // ï¿½ï¿½ï¿½ï¿½
         PlayerData.playerLevel = 1;
         PlayerData.playerExp = 0;
         PlayerData.playerTotalExp = 0;
         PlayerData.expToNextLevel = 100;
 
         PlayerHealth.discountDamage = 0;
-        PlayerHealth.maxHP = 100; // ÀÇµµµÈ °ªÀÎÁö È®ÀÎ ÇÊ¿ä(±âº» 500°ú ºÒÀÏÄ¡ °¡´É)
+        PlayerHealth.maxHP = 100; // ï¿½Çµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ ï¿½Ê¿ï¿½(ï¿½âº» 500ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½)
 
         Ark_stat.ResetStats();
 
-        Debug.Log($"¼Ò¿ï °æÇèÄ¡:{PlayerData.soulExp}");
+        Debug.Log($"ï¿½Ò¿ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡:{PlayerData.soulExp}");
 
-        SoulBuffManager.P_dead = true;
-        SoulBuffManager.ApplyBuffByButtonId("deathTrigger");
+        //SoulBuffManager.P_dead = true;
+        //SoulBuffManager.ApplyBuffByButtonId("deathTrigger");
 
-        SaveSystemManager.SaveOnDeath();
+        //SaveSystemManager.SaveOnDeath();
 
         OnExpChanged?.Invoke();
         OnExpChangedWithValue?.Invoke(PlayerData.playerExp, PlayerData.expToNextLevel, PlayerData.playerLevel);
@@ -177,11 +177,11 @@ public class PlayerExpManager
     public static void LoadPlayerData()
     {
         PlayerExpSave.LoadExp();
-        PlayerDataSaveSystem.Load();
+        //PlayerDataSaveSystem.Load();
 
         if (PlayerData == null) PlayerData = new PlayerData();
 
-        // ±úÁø ¼¼ÀÌºê ¹æ¾î
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½
         if (PlayerData.playerLevel <= 0) PlayerData.playerLevel = 1;
         if (PlayerData.expToNextLevel <= 0) PlayerData.expToNextLevel = 100;
         if (PlayerData.playerExp < 0) PlayerData.playerExp = 0;
@@ -191,8 +191,8 @@ public class PlayerExpManager
 }
 
 /// <summary>
-/// °ÔÀÓ ºÎÆÃ ½Ã °¡Àå ¸ÕÀú PlayerExp µ¥ÀÌÅÍ ÃÊ±âÈ­ º¸Àå
-/// (¿øÄ¡ ¾ÊÀ¸¸é ÀÌ Å¬·¡½º´Â »èÁ¦ÇØµµ µË´Ï´Ù)
+/// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ PlayerExp ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½
+/// (ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ ï¿½Ë´Ï´ï¿½)
 /// </summary>
 public static class GameBoot_PlayerExp
 {

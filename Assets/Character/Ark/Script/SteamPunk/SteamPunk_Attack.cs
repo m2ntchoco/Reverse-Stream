@@ -7,28 +7,28 @@ using Unity.VisualScripting;
 
 public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
 {
-    [Header("ÆòÅ¸ ½ºÅÜ")]
+    [Header("ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½")]
     public float step1Distance = 0.35f;
     public float step1Duration = 0.08f;
     public float step2Distance = 0.28f;
     public float step2Duration = 0.07f;
-    public AnimationCurve stepCurve; // ÀÎ½ºÆåÅÍ¿¡¼­ °£´ÜÇÑ EaseOut Ä¿ºê ÁöÁ¤ ±ÇÀå
+    public AnimationCurve stepCurve; // ï¿½Î½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ EaseOut Ä¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-    public float requiredHoldTime = 0.35f; // Â÷Â¡ °­°ø°Ý Â÷Â¡ ½Ã°£
-    private const float maxCommandWindow = 1f;  // Ä¿¸Çµå ÀÔ·Â °¡´É ÃÖ´ë ½Ã°£ (¿¹: 0.5ÃÊ)
+    public float requiredHoldTime = 0.35f; // ï¿½ï¿½Â¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Â¡ ï¿½Ã°ï¿½
+    private const float maxCommandWindow = 1f;  // Ä¿ï¿½Çµï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Ã°ï¿½ (ï¿½ï¿½: 0.5ï¿½ï¿½)
 
     //Attack
     public float m_timeSinceAttack = 0.0f;
     public int m_currentAttack = 0;
-    public bool isCommandWindow = false;         // 2¹øÂ° °ø°Ý ÈÄ Ä¿¸Çµå ÀÔ·Â ´ë±â ÁßÀÎÁö ¿©ºÎ
-    public float commandWindowTimer = 0f;        // Ä¿¸Çµå ÀÔ·Â °¡´É ½Ã°£ ´©Àû¿ë Å¸ÀÌ¸Ó
+    public bool isCommandWindow = false;         // 2ï¿½ï¿½Â° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ä¿ï¿½Çµï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public float commandWindowTimer = 0f;        // Ä¿ï¿½Çµï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½
     public float BonusDamage = 1f;
 
     //speed
     public float SpeedMulti = 1.2f;
-    public static bool AttackCountReady = false; //°ø°ÝÀÌ ¹ßµ¿Çß´ÂÁö È®ÀÎÇÏ´Â bool¹®
+    public static bool AttackCountReady = false; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ßµï¿½ï¿½ß´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï´ï¿½ boolï¿½ï¿½
 
-    //ÂüÁ¶
+    //ï¿½ï¿½ï¿½ï¿½
     private SteamPressureSystem steamSystem;
     private PlayerAnimationSync sync;
     private Player_move move;
@@ -38,30 +38,30 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
         sync = GetComponentInParent<PlayerAnimationSync>();
         steamSystem = GetComponentInParent<SteamPressureSystem>();
         move = GetComponentInParent<Player_move>();
-        AttackSpeed.RegisterRunner(this);  // ½ÇÇà ÁÖÃ¼ µî·Ï
+        //AttackSpeed.RegisterRunner(this);  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½
     }
 
     private void Update()
     {
-        // ¦¡¦¡ [¾Ö´Ï¸ÞÀÌ¼Ç Àá±Ý] ÇöÀç °ø°Ý ¸ð¼Ç(Attack1/Attack2)ÀÌ ³¡³ª±â Àü±îÁö ¸ðµç ÀÔ·Â ¹«½Ã
+        // ï¿½ï¿½ï¿½ï¿½ [ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½(Attack1/Attack2)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½
         var state = sync.CurrentStateInfo;
         bool inAttackAnim = (state.IsName("Attack 1") || state.IsName("Attack 2") || state.IsName("OverHit_Attack 1")
             || state.IsName("OverHit_Attack 2") || state.IsName("OverHit_Attack1") || state.IsName("Side_Command") || state.IsName("Down_Command"));
         if (inAttackAnim && state.normalizedTime < 1f)
             return;
 
-        // 1) ±âº» Å¸ÀÌ¸Ó ¾÷µ¥ÀÌÆ®
+        // 1) ï¿½âº» Å¸ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
         m_timeSinceAttack += Time.deltaTime;
 
-        // 2) Ä¿¸Çµå À©µµ¿ì Ã³¸® (3¹øÂ° °ø°Ý ÈÄ ÀÔ·Â ´ë±â)
+        // 2) Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ (3ï¿½ï¿½Â° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½)
         if (isCommandWindow)
         {
-            // ¿À¹öÈ÷Æ® »óÅÂ°¡ ¾Æ´Ï¾î¾ß Ä¿¸Çµå ÀÔ·Â°ú ½Ã°£ ÁøÇà
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Æ´Ï¾ï¿½ï¿½ Ä¿ï¿½Çµï¿½ ï¿½Ô·Â°ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (steamSystem != null && !steamSystem.isOverheated)
             {
                 commandWindowTimer += Time.deltaTime;
 
-                // 2-1) ½Ã°£ ÃÊ°ú ¡æ À©µµ¿ì Á¾·á
+                // 2-1) ï¿½Ã°ï¿½ ï¿½Ê°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 if (commandWindowTimer >= maxCommandWindow)
                 {
                     isCommandWindow = false;
@@ -70,20 +70,20 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
                     return;
                 }
 
-                // 2-2) A Å° ´©¸§ ¡æ ¾Æ·§ ¹æÇâÅ° ÀÖÀ¸¸é ¾Æ·§ °­°ø
+                // 2-2) A Å° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½Å° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½
                 if (Input.GetKeyDown(KeyCode.A))
                 {
                     AttackCountReady = true;
-                    AttackSpeed.AttackSpeedUP();
-                    AttackSpeed.SpeedUPSize();
-                    if (TryGetComponent<SoulBuffAttack>(out var buff))
+                    //AttackSpeed.AttackSpeedUP();
+                    //AttackSpeed.SpeedUPSize();
+                    //f (TryGetComponent<SoulBuffAttack>(out var buff))
                     {
-                        buff.TryBuffAttack(); // ¹öÇÁ »óÅÂ¸¸ °»½Å (return ¾È ½áµµ µÊ)
+                        //buff.TryBuffAttack(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ (return ï¿½ï¿½ ï¿½áµµ ï¿½ï¿½)
                     }
 
                     if (Input.GetKey(KeyCode.DownArrow))
                     {
-                        Debug.Log("¾Æ·§ °­°ø");
+                        Debug.Log("ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½");
                         move.AttackSpeedDownDuringAnimation(0.3f);
                         move.SetAttackLock(true);
                         sync.DownCommand();
@@ -98,7 +98,7 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
 
                     if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
                     {
-                        Debug.Log("¿· °­°ø");
+                        Debug.Log("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
                         move.AttackSpeedDownDuringAnimation(0.3f);
                         move.SetAttackLock(true);
                         sync.SideCommand();
@@ -113,35 +113,35 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
             }
 
 
-            // Ä¿¸Çµå À©µµ¿ì ÁßÀÌ¹Ç·Î ÀÏ¹Ý °ø°Ý ¹«½Ã
+            // Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¹Ç·ï¿½ ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             return;
         }
 
 
-        // 3) ÀÏ¹Ý ÄÞº¸ ÀÔ·Â Ã³¸® (Ä¿¸Çµå À©µµ¿ì ¾Æ´Ò ¶§¸¸ A Å°·Î °ø°Ý)
+        // 3) ï¿½Ï¹ï¿½ ï¿½Þºï¿½ ï¿½Ô·ï¿½ Ã³ï¿½ï¿½ (Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´ï¿½ ï¿½ï¿½ï¿½ï¿½ A Å°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
         if (Input.GetKeyDown(KeyCode.A) && m_timeSinceAttack > 0.1f)
         {
             AttackCountReady = true;
-            AttackSpeed.AttackSpeedUP();
-            AttackSpeed.SpeedUPSize();
-            if (TryGetComponent<SoulBuffAttack>(out var buff))
+            //AttackSpeed.AttackSpeedUP();
+            //AttackSpeed.SpeedUPSize();
+            //if (TryGetComponent<SoulBuffAttack>(out var buff))
             {
-                buff.TryBuffAttack(); // ¹öÇÁ »óÅÂ¸¸ °»½Å (return ¾È ½áµµ µÊ)
+                //buff.TryBuffAttack(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½ (return ï¿½ï¿½ ï¿½áµµ ï¿½ï¿½)
             }
 
             m_currentAttack++;
 
-            BonusDamage = 2f; //¿À¹öÈ÷Æ®°¡ µÇ¸é µ¥¹ÌÁö 2¹è
+            BonusDamage = 2f; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½
 
-            // 3-1) ÄÞº¸ À¯Áö ½Ã°£ ÃÊ°ú ½Ã ÃÊ±âÈ­
+            // 3-1) ï¿½Þºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½Ê°ï¿½ ï¿½ï¿½ ï¿½Ê±ï¿½È­
             if (m_timeSinceAttack > 2.0f)
                 m_currentAttack = 1;
 
-            // 3-2) ÄÞº¸°¡ 3´Ü°è¸¦ ³Ñ¾î°¡¸é 1´Ü°è·Î ¼øÈ¯
+            // 3-2) ï¿½Þºï¿½ï¿½ï¿½ 3ï¿½Ü°è¸¦ ï¿½Ñ¾î°¡ï¿½ï¿½ 1ï¿½Ü°ï¿½ï¿½ ï¿½ï¿½È¯
             if (m_currentAttack > 2)
                 m_currentAttack = 1;
 
-            // 3-3) ¾Ö´Ï¸ÞÀÌÅÍ Æ®¸®°Å ¹ßµ¿
+            // 3-3) ï¿½Ö´Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ßµï¿½
             if (steamSystem.isOverheated)
             {
                 move.AttackSpeedDownDuringAnimation(0.3f);
@@ -157,7 +157,7 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
                 m_timeSinceAttack = 0f;
             }
 
-            // 3-4) 3¹øÂ° °ø°ÝÀÌ ¹ßµ¿µÆÀ» °æ¿ì Ä¿¸Çµå À©µµ¿ì ÁøÀÔ
+            // 3-4) 3ï¿½ï¿½Â° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ßµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (m_currentAttack == 2)
             {
                 if (steamSystem.isOverheated)
@@ -173,17 +173,17 @@ public class SteamPunk_Attack : MonoBehaviour, IAttackAnimEvents
         }
         if (Input.GetKeyDown(KeyCode.Alpha9))
         {
-            Debug.Log("°ø¼ÓÁõ°¡");
-            //Ark_stat.SetAttackSpeed(SpeedMulti); // °ø¼Ó 20% Áõ°¡
+            Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+            //Ark_stat.SetAttackSpeed(SpeedMulti); // ï¿½ï¿½ï¿½ï¿½ 20% ï¿½ï¿½ï¿½ï¿½
         }
         if (Input.GetKeyDown(KeyCode.Alpha8))
         {
-            Debug.Log("°ø¼Ó ÃÊ±âÈ­");
+            Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­");
             Ark_stat.ResetAttackSpeed();
         }
     }
 
-    // === ¾Ö´Ï¸ÞÀÌ¼Ç ÀÌº¥Æ®°¡ ¸±·¹ÀÌ ÅëÇØ È£Ãâ ===
+    // === ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ ===
     public void OnStep(int index)
     {
         if (index == 1)

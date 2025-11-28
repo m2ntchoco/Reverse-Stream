@@ -12,55 +12,55 @@ public static class Ark_stat
     public static int luck;
     public static int remainingStatPoints;
 
-    public static event Action StatsChanged;   // ¡Ú Ãß°¡
+    public static event Action StatsChanged;   // ï¿½ï¿½ ï¿½ß°ï¿½
 
-    // --- °ø°Ý ¼Óµµ ¸ðµ¨ ---
-    // Àåºñ/·¹º§ µîÀ¸·Î °áÁ¤µÇ´Â "±âº» °ø¼Ó"
+    // --- ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ ï¿½ï¿½ ---
+    // ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ "ï¿½âº» ï¿½ï¿½ï¿½ï¿½"
     public static float BaseAttackSpeed = 1.3f;
 
-    // ½ºÅÃ/ÆÐ½Ãºê µî¿¡¼­ ¼³Á¤ÇÏ´Â "³»ºÎ ¹è¼ö" (AttackSpeed.cs°¡ ÀÌ °ª¸¸ °Çµå¸²: 1.10~1.60 µî)
+    // ï¿½ï¿½ï¿½ï¿½/ï¿½Ð½Ãºï¿½ ï¿½î¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½" (AttackSpeed.csï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Çµå¸²: 1.10~1.60 ï¿½ï¿½)
     public static float attackSpeedMultiplier = 1.0f;
 
-    // (¼±ÅÃ) Æ÷¼Ç, ¿À¶ó °°Àº ¿ÜºÎ ÀÏ½Ã¹öÇÁ ¹è¼ö
+    // (ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Üºï¿½ ï¿½Ï½Ã¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     public static float externalBuffMultiplier = 1.0f;
 
-    // ÃÖÁ¾ °ø¼ÓÀº Ç×»ó ¿©±â¼­¸¸ °è»êÇØ¼­ ³Ñ±è
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×»ï¿½ ï¿½ï¿½ï¿½â¼­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Ñ±ï¿½
     public static float GetAttackSpeed()
     {
         return BaseAttackSpeed * attackSpeedMultiplier * externalBuffMultiplier;
     }
 
-    // ³»ºÎ ¹è¼ö¸¸ ¼³Á¤(½ºÅÃ ·ÎÁ÷ÀÌ È£Ãâ)
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½)
     public static void SetAttackSpeedMultiplier(float multiplier)
     {
         attackSpeedMultiplier = Mathf.Max(0.0001f, multiplier);
     }
 
-    // ¿ÜºÎ ¹öÇÁ ¹è¼ö ¼³Á¤(ÇÊ¿ä ¾øÀ¸¸é ¾È ½áµµ µÊ)
+    // ï¿½Üºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½áµµ ï¿½ï¿½)
     public static void SetExternalBuffMultiplier(float multiplier)
     {
         externalBuffMultiplier = Mathf.Max(0.0001f, multiplier);
     }
 
-    // °ø¼Ó °ü·Ã ¸®¼Â: ¹è¼öµéÀ» 1·Î, Base´Â À¯Áö(Àåºñ°¡ ¹Ù²Ù´Â °ª)
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½, Baseï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ ï¿½Ù²Ù´ï¿½ ï¿½ï¿½)
     public static void ResetAttackSpeed()
     {
         attackSpeedMultiplier = 1.0f;
         externalBuffMultiplier = 1.0f;
-        // BaseAttackSpeed´Â Àåºñ/·¹º§ ½Ã½ºÅÛ¿¡¼­ °ü¸®
+        // BaseAttackSpeedï¿½ï¿½ ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ ï¿½Ã½ï¿½ï¿½Û¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
-    // ====== ÀúÀå/·Îµå ======
+    // ====== ï¿½ï¿½ï¿½ï¿½/ï¿½Îµï¿½ ======
     public static void LoadFrom(statSaveData data)
     {
         health = data.health;
         strength = data.strength;
         dexterity = data.dexterity;
         intelligence = data.intelligence;
-        luck = data.luck;                    // ¡Ú ´©¶ôµÇ¾î ÀÖ´ø ºÎºÐ Ãß°¡
+        luck = data.luck;                    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ ï¿½Ö´ï¿½ ï¿½Îºï¿½ ï¿½ß°ï¿½
         remainingStatPoints = data.remainingStatPoints;
 
-        // BaseAttackSpeed/¹è¼ö´Â º¸Åë Àåºñ/¹öÇÁ¿¡ ÀÇÇØ °áÁ¤µÊ. ÇÊ¿ä ½Ã data¿¡ Æ÷ÇÔ½ÃÄÑµµ µÊ.
+        // BaseAttackSpeed/ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½Ê¿ï¿½ ï¿½ï¿½ dataï¿½ï¿½ ï¿½ï¿½ï¿½Ô½ï¿½ï¿½Ñµï¿½ ï¿½ï¿½.
     }
 
     public static void ApplyTo(statSaveData data)
@@ -69,10 +69,10 @@ public static class Ark_stat
         data.strength = strength;
         data.dexterity = dexterity;
         data.intelligence = intelligence;
-        data.luck = luck;                    // ¡Ú ´©¶ôµÇ¾î ÀÖ´ø ºÎºÐ Ãß°¡
+        data.luck = luck;                    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ ï¿½Ö´ï¿½ ï¿½Îºï¿½ ï¿½ß°ï¿½
         data.remainingStatPoints = remainingStatPoints;
 
-        // ÇÊ¿ä ½Ã BaseAttackSpeed µîµµ ÀúÀå
+        // ï¿½Ê¿ï¿½ ï¿½ï¿½ BaseAttackSpeed ï¿½îµµ ï¿½ï¿½ï¿½ï¿½
     }
 
     public static void ResetStats()
@@ -83,17 +83,10 @@ public static class Ark_stat
         intelligence = 0;
         luck = 0;
         remainingStatPoints = 20;
-        Debug.Log("ÇÃ·¹ÀÌ¾î ½ºÅÈÀÌ ÃÊ±âÈ­µÇ¾ú½À´Ï´Ù.");
+        Debug.Log("ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
     }
 
-    public static bool MeetsRequirement(WeaponPrefabData data)
-    {
-        return health >= data.requiredHp &&
-               strength >= data.requiredStr &&
-               dexterity >= data.requiredDex &&
-               intelligence >= data.requiredInt &&
-               luck >= data.requiredluk;
-    }
+    
 
     public enum StatType { Health, Strength, Dexterity, Intelligence, Luck }
 
@@ -112,7 +105,7 @@ public static class Ark_stat
 
         remainingStatPoints--;
         SaveManager.Instance.SaveNow();
-        StatsChanged?.Invoke();  // ¡Ú ½ºÅÈ ¹Ù²î¸é ¾Ë¸² ¹ß»ç
+        StatsChanged?.Invoke();  // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ ï¿½Ë¸ï¿½ ï¿½ß»ï¿½
         return true;
     }
 }

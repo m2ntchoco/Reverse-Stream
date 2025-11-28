@@ -1,20 +1,20 @@
-// PlayerAnimationEvents.cs (¾Ö´Ï¸ÞÀÌÅÍ ¿ÀºêÁ§Æ®¿¡ ºÙÀÌ±â)
+// PlayerAnimationEvents.cs (ï¿½Ö´Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½Ì±ï¿½)
 using UnityEngine;
 
 public class AttackEvent : MonoBehaviour
 {
     private Attack_Damage attack;
-    private Magic_Attack magicattack;
+    //private Magic_Attack magicattack;
 
     void Start()
     {
         attack = GetComponentInParent<Attack_Damage>();
-        magicattack = GetComponentInParent<Magic_Attack>();
+        //magicattack = GetComponentInParent<Magic_Attack>();
     }
 
     public void NomalAttackEvent()
     {
-        attack?.NormalAttack(); // ½ÇÁ¦ ·ÎÁ÷ ½ÇÇà
+        attack?.NormalAttack(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
     public void DownCommandEvent()
     {
@@ -26,7 +26,7 @@ public class AttackEvent : MonoBehaviour
     }
     public void SideCommand_SwordAura()
     {
-        magicattack.UseSlashSkill();
+        //magicattack.UseSlashSkill();
     }
 
 }

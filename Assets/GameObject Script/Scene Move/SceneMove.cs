@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class SceneMove : MonoBehaviour
 {
-    [Header("¿ÀºêÁ§Æ® ÂüÁ¶")]
-    [SerializeField] GameObject Player;             // ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ®
-    [SerializeField] GameObject Portal;             // Æ÷Å» º»Ã¼
-    [SerializeField] GameObject PortalImpact;       // Æ÷Å» È°¼ºÈ­ ÀÌÆåÆ®
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField] GameObject Player;             // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+    [SerializeField] GameObject Portal;             // ï¿½ï¿½Å» ï¿½ï¿½Ã¼
+    [SerializeField] GameObject PortalImpact;       // ï¿½ï¿½Å» È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½Æ®
 
-    [Header("¾À Èå¸§")]
-    [SerializeField] SceneFlowLoader flowLoader;    // ÀÚµ¿ ¾À ÀüÈ¯À» À§ÇÑ SceneFlowLoader ¿¬°á
+    [Header("ï¿½ï¿½ ï¿½å¸§")]
+    [SerializeField] SceneFlowLoader flowLoader;    // ï¿½Úµï¿½ ï¿½ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SceneFlowLoader ï¿½ï¿½ï¿½ï¿½
 
     private int layerToFind;
     private bool layerExistsInScene;
@@ -25,11 +25,11 @@ public class SceneMove : MonoBehaviour
     {
         UpdateEnemyPresence();
 
-        // F Å° ´©¸£°í ÇÃ·¹ÀÌ¾î°¡ Æ÷Å» ¹üÀ§ ¾È¿¡ ÀÖÀ¸¸ç, Æ÷Å»ÀÌ È°¼ºÈ­µÇ¾î ÀÖÀ¸¸é ¾À ÀüÈ¯
+        // F Å° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½Å» ï¿½ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Å»ï¿½ï¿½ È°ï¿½ï¿½È­ï¿½Ç¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯
         if (isPlayerInPortalZone && PortalImpact.activeInHierarchy && Input.GetKeyDown(KeyCode.F))
         {
-            SaveSystemManager.SaveOnSceneTransition(); //¾ÀÀÌ ¹Ù²ð¶§ÀÇ ÀúÀå ½Ã½ºÅÛ ÅëÇÕ°ü¸® ÀÌ ºÎºÐ¸¸ ¼öÁ¤
-            flowLoader.LoadNextScene(); // ¿©±â¼­ ½ÇÁ¦ ¾À ÀüÈ¯ ¹ß»ý
+            //SaveSystemManager.SaveOnSceneTransition(); //ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Õ°ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ÎºÐ¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+            flowLoader.LoadNextScene(); // ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½ß»ï¿½
 
         }
     }
@@ -51,9 +51,9 @@ public class SceneMove : MonoBehaviour
         }
 
         layerExistsInScene = enemyCount > 0;
-        Debug.Log($"[SceneMove] Enemy count: {enemyCount}, Portal È°¼ºÈ­ ¿©ºÎ: {!layerExistsInScene}");
+        Debug.Log($"[SceneMove] Enemy count: {enemyCount}, Portal È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½: {!layerExistsInScene}");
 
-        // Enemy°¡ ¾øÀ¸¸é Æ÷Å» È°¼ºÈ­
+        // Enemyï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å» È°ï¿½ï¿½È­
         PortalImpact.SetActive(!layerExistsInScene);
     }
 
