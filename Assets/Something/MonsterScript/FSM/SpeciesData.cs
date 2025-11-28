@@ -68,7 +68,7 @@ public class SpeciesData : ScriptableObject
     public bool isLeader = false;
     public float leaderBuffDamageMultiplier = 1.5f; //리더와 함께 싸울때 데미지 배율 
     public float commandRadius = 15f; //리더가 죽었을 때 효과가 전파되는 범위
-
+    //깃허브 테스트용 주석
     // (필요시 추가)
     // public AttackPatternType attackType = AttackPatternType.Normal; 
 }
