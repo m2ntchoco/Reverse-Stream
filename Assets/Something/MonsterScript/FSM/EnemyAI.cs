@@ -27,7 +27,9 @@ public class EnemyAI : MonoBehaviour, IHealth
     private LayerMask enemyLayerMask; // (성능을 위해 레이어 마스크를 캐시)
     public int mySquadRank { get; private set; } = 0;
     public Vector3 lastKnownPos; // 마지막으로 플레이어가 목격된 위치\
-    private static int ghostUserCount = 0; // 유령 모드 사용 중인 몬스터 수
+    private static int globalGhostCount = 0; // 유령 모드 사용 중인 몬스터 수
+    private bool isMyGhostActive = false; // 이 몬스터가 유령 모드인지 여부(안전장치)
+    private bool isBerserkMode = false; //광폭화 상태인지 체크
     // 트리거 기반 감지 처리
     public bool playerInRange = false;
     public bool playerAttackable = false;
@@ -257,7 +259,14 @@ public class EnemyAI : MonoBehaviour, IHealth
             canAttack = true;
         }
     }
-
+    private void OnDisable() //유령모드 안전장치
+    {
+        // 몬스터가 꺼질 때, 유령 모드였다면 끄고 나감
+        if (isMyGhostActive)
+        {
+            SetPassThroughPlayer(false);
+        }
+    }
     public void FaceDirection(int dir) // 그림 전환 메소드
     {
         if (dir == 0) return;
@@ -566,7 +575,13 @@ public class EnemyAI : MonoBehaviour, IHealth
         Debug.Log($"{gameObject.name} | HP: {currentHP}/{speciesData.maxHP} | 용기: {currentCourage} (+{allyCourageBonus}) / {speciesData.maxHP}");
         // --- 3. 상태 변경 (기존 로직) ---
         float effectiveCourage = currentCourage + allyCourageBonus;
-
+        if(speciesData.isLeader && speciesData.useBerserk && !isBerserkMode)
+        {
+            if(currentHP <= speciesData.maxHP * speciesData.berserkThreshold)
+            {
+                ActivateBerserk();
+            }
+        }
         if (effectiveCourage <= 0 && currentState != fleeState)
         {
             ChangeState(fleeState);
@@ -623,13 +638,19 @@ public class EnemyAI : MonoBehaviour, IHealth
             }
         }
         allyCount = Mathf.Min(allyCount, (int)speciesData.MaxPackBonusCount);
-
+        
         // 보너스 계산
         this.allyCourageBonus = allyCount * speciesData.courageBonusPerAlly;
 
+       
         float bonusSpeed = allyCount * speciesData.speedBonusPerAlly;
         this.currentMoveSpeed = speciesData.chaseSpeed + bonusSpeed;
-
+        if(currentLeader != null && currentLeader.isBerserkMode) //리더 광폭화 버프 적용
+        {
+            this.currentMoveSpeed *= currentLeader.speciesData.berserkSpeedMultiplier;
+            this.currentCooldown *= 0.5f; //리더가 광폭화 상태면 쿨타임 절반
+            Debug.Log($"[리더 광폭화 버프] 속도: {currentMoveSpeed}, 쿨타임: {currentCooldown}");
+        }
         float reduction = allyCount * speciesData.cooldownReductionPerAlly;
         this.currentCooldown = Mathf.Max(0.5f, speciesData.attackCooldown - reduction);
 
@@ -752,70 +773,59 @@ public class EnemyAI : MonoBehaviour, IHealth
 
     public void SetPassThroughPlayer(bool enablePassThrough)
     {
-        // 1. 내 몸에 붙은 모든 콜라이더 가져오기 (자식 포함)
+        // 1. 내 몸에 붙은 모든 콜라이더 가져오기
         Collider2D[] myColliders = GetComponentsInChildren<Collider2D>();
 
-        // 2. 플레이어 몸에 붙은 모든 콜라이더 가져오기 (자식 포함)
+        // 2. 플레이어 몸에 붙은 모든 콜라이더 가져오기
         Collider2D[] playerColliders = null;
         if (PlayerTransform != null)
         {
             playerColliders = PlayerTransform.GetComponentsInChildren<Collider2D>();
         }
 
-        // 3. [핵심] 모든 경우의 수에 대해 충돌 끄기/켜기
-        foreach (var myCol in myColliders)
+        if (myColliders != null && playerColliders != null)
         {
-            // A. 플레이어와의 충돌 제어
-            if (playerColliders != null)
+            foreach (var myCol in myColliders)
             {
                 foreach (var pCol in playerColliders)
                 {
-                    // 두 콜라이더 간의 충돌을 무시(true)하거나 복구(false)
+                    // 핵심: 여기서는 플레이어와의 충돌만 건드립니다.
                     Physics2D.IgnoreCollision(myCol, pCol, enablePassThrough);
                 }
             }
-
-            // B. 다른 몬스터(친구들)와의 충돌 제어
-            // (포위 이동 중일 때는 친구끼리도 겹쳐지게 해서 부드럽게 이동)
-            // 주의: LayerCollision을 쓰면 전역 설정이 바뀌므로, 여기서는 IgnoreLayerCollision을 씁니다.
-            // "Enemy" 레이어(8번이라고 가정)끼리의 충돌을 제어
-            int enemyLayer = LayerMask.NameToLayer("Enemy");
-            Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, enablePassThrough);
         }
     }
-    public void SetSearchGhostMode(bool isGhost)
+    public void SetGhostMode(bool enable)
     {
-        if (myCollider == null) return;
+        // 1. 중복 호출 방지
+        if (isMyGhostActive == enable) return;
+        isMyGhostActive = enable;
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         
-        if (isGhost)
+        if (enable)
         {
-            ghostUserCount++; // 수색하는 몬스터 수 증가
-            
-            // 1명이라도 있으면 충돌 끄기
-            if (ghostUserCount > 0 && enemyLayer != -1)
-            {
+            globalGhostCount++; 
+            // 1명이라도 유령이면 -> 적끼리 충돌 끔
+            if (globalGhostCount > 0 && enemyLayer != -1)
                 Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
-            }
         }
         else
         {
-            ghostUserCount--; // 수색 끝난 몬스터 수 감소
-            if (ghostUserCount < 0) ghostUserCount = 0;
+            globalGhostCount--; 
+            if (globalGhostCount < 0) globalGhostCount = 0;
 
-            // 아무도 수색 안 할 때만 충돌 다시 켜기 (이게 핵심!)
-            if (ghostUserCount == 0 && enemyLayer != -1)
-            {
+            // 아무도 유령이 아니면 -> 적끼리 충돌 다시 켬
+            if (globalGhostCount == 0 && enemyLayer != -1)
                 Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, false);
-            }
         }
 
-        // 플레이어와의 충돌은 개별적으로 끄기 (기존 유지)
-        if (playerCollider != null)
-        {
-            Physics2D.IgnoreCollision(myCollider, playerCollider, isGhost);
-        }
+        // (플레이어 충돌 제어 코드는 삭제함 -> SetPassThroughPlayer가 전담)
+    }
+    public void SetSearchGhostMode(bool isGhost)
+    {
+        // 기능이 똑같으므로 통합된 함수를 호출
+        SetPassThroughPlayer(isGhost);
     }
     // --- 협동 전술 용 특정 지점으로 이동하는 함수 (범용 이동) ---
     public void MoveToTarget(Vector3 targetPos)
@@ -840,6 +850,30 @@ public class EnemyAI : MonoBehaviour, IHealth
         
         Debug.Log($"[{gameObject.name}] 리더 사망! 공포에 질려 도망칩니다!");
         ChangeState(fleeState); // 즉시 도주 상태로 전환
+    }
+    private void ActivateBerserk() //광폭화 발동
+    {
+        isBerserkMode = true;
+        Debug.Log($"<color=red>[Leader] {gameObject.name} 광폭화 발동!! 모두 돌격!!</color>");
+
+        // 1. 나 자신의 스펙 강화 (예: 체력 조금 회복 or 무적 등)
+        // currentCourage = speciesData.maxCourage * 2; // 용기 풀충전
+
+        // 2. 주변 모든 부하들에게 광폭화 명령
+        Collider2D[] followers = Physics2D.OverlapCircleAll(transform.position, speciesData.commandRadius, enemyLayerMask);
+        foreach (var col in followers)
+        {
+            if (col.TryGetComponent<EnemyAI>(out EnemyAI minion))
+            {
+                // 부하들의 속도를 강제로 올림 (UpdateCourageBonus에서 덮어씌워질 수 있으므로, 
+                // 아예 BerserkMode 변수를 부하도 갖게 하거나, 버프 수치를 조작해야 함)
+                
+                // 여기서는 간단하게 '용기 보너스' 함수에 영향을 주는 방식으로 구현 추천
+                // 혹은 즉발적인 효과 부여:
+                minion.GetAnimator().speed = 2.0f; // 애니메이션 속도 2배
+                // (제대로 하려면 EnemyAI에 'berserkBuffMultiplier' 변수를 두고 그걸 적용해야 함)
+            }
+        }
     }
     void DebugLogLoadedData()
     {

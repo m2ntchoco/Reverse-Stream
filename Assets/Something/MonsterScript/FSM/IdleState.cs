@@ -135,12 +135,14 @@ public class IdleState : IEnemyState
         if (moveDir == 0)
         {
             // 멈춤
+            enemy.SetGhostMode(false); // 멈췄으니 충돌 활성화
             enemy.GetRigidbody().linearVelocity = new Vector2(0, enemy.GetRigidbody().linearVelocity.y);
             ani.SetMoving(false);
         }
         else
         {
             // 이동
+            enemy.SetGhostMode(true); // 이동 중이니 충돌 비활성화
             float enemyspeed = enemy.speciesData.patrolSpeed;
             enemy.GetRigidbody().linearVelocity = new Vector2(moveDir * enemyspeed, enemy.GetRigidbody().linearVelocity.y);
             ani.SetMoving(true);
@@ -153,6 +155,6 @@ public class IdleState : IEnemyState
 
     public void Exit()
     {
-        // (필요시 추가)
+        enemy.SetGhostMode(false); // 상태 종료 시 충돌 활성화
     }
 }

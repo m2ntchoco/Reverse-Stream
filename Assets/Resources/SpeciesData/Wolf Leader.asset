@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Wolf Leader
   m_EditorClassIdentifier: 
   speciesTag: Wolf Leader
-  maxCourage: 5
-  aggression: 5
-  maxHP: 10
+  maxCourage: 10
+  aggression: 10
+  maxHP: 200
   attackRange: 2
   NAttackDamage: 40
   SAttackDamage: 60
@@ -45,3 +45,6 @@ MonoBehaviour:
   isLeader: 1
   leaderBuffDamageMultiplier: 1.5
   commandRadius: 20
+  useBerserk: 1
+  berserkThreshold: 0.4
+  berserkSpeedMultiplier: 2

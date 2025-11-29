@@ -68,7 +68,9 @@ public class SpeciesData : ScriptableObject
     public bool isLeader = false;
     public float leaderBuffDamageMultiplier = 1.5f; //리더와 함께 싸울때 데미지 배율 
     public float commandRadius = 15f; //리더가 죽었을 때 효과가 전파되는 범위
-    //깃허브 테스트용 주석
+    public bool useBerserk = true; //광폭화 스킬 사용 여부
+    public float berserkThreshold = 0.4f; //광폭화 발동 체력 비율(현재 40퍼)
+    public float berserkSpeedMultiplier = 2.0f; //광폭화시 속도 배율
     // (필요시 추가)
     // public AttackPatternType attackType = AttackPatternType.Normal; 
 }

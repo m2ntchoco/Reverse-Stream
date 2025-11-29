@@ -33,7 +33,7 @@ public class SearchState : IEnemyState
 
         enemy.moveSpeed = enemy.speciesData.chaseSpeed; 
         //enemy.SetPassThroughPlayer(true); 플레이어 통과 함수 일단 혹시 모르니 주석처리
-        enemy.SetSearchGhostMode(true);
+        enemy.SetGhostMode(true);
         ani.SetMoving(true);
         
     }
@@ -94,6 +94,6 @@ public class SearchState : IEnemyState
     {
         ani.SetMoving(false);
         //enemy.SetPassThroughPlayer(false); 위의 경우와 동일한 이유로 주석처리
-        enemy.SetSearchGhostMode(false);
+        enemy.SetGhostMode(false);
     }
 }

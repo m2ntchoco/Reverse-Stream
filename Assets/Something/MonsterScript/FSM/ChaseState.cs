@@ -146,12 +146,14 @@ public class ChaseState : IEnemyState
                 ani.SetMoving(true);
                 enemy.GetAnimator().speed = 1.5f;
                 enemy.SetPassThroughPlayer(true); 
+                enemy.SetGhostMode(true); //이동시작이니 충돌 비활성화
                 enemy.MoveToTarget(dynamicTargetPos); 
                 return; 
             }
             else
             {
                 enemy.SetPassThroughPlayer(true);
+                enemy.SetGhostMode(false); //멈췄으니 충돌 활성화
                 enemy.GetRigidbody().linearVelocity = Vector2.zero;
                 ani.SetMoving(false);
                 enemy.FacetoPlayer(); 
@@ -163,6 +165,7 @@ public class ChaseState : IEnemyState
         if (inAttackRange)
         {
             enemy.SetPassThroughPlayer(false);
+            enemy.SetGhostMode(false); //멈췄으니 충돌 활성화
             ani.SetMoving(false);
             enemy.StopMoving();
         }
@@ -171,11 +174,13 @@ public class ChaseState : IEnemyState
             ani.SetMoving(true);
             enemy.GetAnimator().speed = 1.5f;
             enemy.SetPassThroughPlayer(false);
+            enemy.SetGhostMode(true); //이동시작이니 충돌 비활성화
             enemy.MoveTowardsPlayer();
         }
         else
         {
             enemy.SetPassThroughPlayer(false);
+            enemy.SetGhostMode(false); //멈췄으니 충돌 활성화
             ani.SetMoving(false);
             enemy.StopMoving();
         }
@@ -186,5 +191,6 @@ public class ChaseState : IEnemyState
         enemy.GetAnimator().speed = 1f;
 
         enemy.SetPassThroughPlayer(false); // 상태 종료 시 플레이어와 충돌 활성화
+        enemy.SetGhostMode(false); // 상태 종료 시 충돌 활성화
     }
 }

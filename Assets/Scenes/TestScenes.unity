@@ -1363,7 +1363,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthBarPrefab: {fileID: 5981938191311567561, guid: dc8cd91736dfba140bde522fd3cb5df8, type: 3}
   worldSpaceCanvas: {fileID: 2549476924453166302}
-  currentCourage: 5
+  currentCourage: 10
   hasDealtDamage: 0
   justAlerted: 0
   lastKnownPos: {x: 0, y: 0, z: 0}
@@ -1389,7 +1389,7 @@ MonoBehaviour:
   BusterChasingTime: 0
   BusterAttackSpeed: 0
   waitScore: 0
-  currentHP: 4545454
+  currentHP: 200
   IsDeath: 0
   IsAttacking: 0
   IsMoving: 0
@@ -1572,7 +1572,7 @@ GameObject:
   m_Component:
   - component: {fileID: 845400150}
   - component: {fileID: 845400151}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: isground (3)
   m_TagString: Wolf
   m_Icon: {fileID: 0}
@@ -1777,7 +1777,7 @@ GameObject:
   m_Component:
   - component: {fileID: 999719545}
   - component: {fileID: 999719546}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: isground (3)
   m_TagString: Wolf
   m_Icon: {fileID: 0}
@@ -2727,7 +2727,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1445135186}
   - component: {fileID: 1445135187}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: isground (3)
   m_TagString: Wolf
   m_Icon: {fileID: 0}
@@ -2805,7 +2805,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1521733650}
   - component: {fileID: 1521733651}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: isground (3)
   m_TagString: Wolf
   m_Icon: {fileID: 0}
@@ -7655,7 +7655,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3823022494618983544}
   - component: {fileID: 5073751094601688546}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: isground (3)
   m_TagString: Wolf
   m_Icon: {fileID: 0}
