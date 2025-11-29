@@ -26,7 +26,7 @@ public class PlayerAnimationSync : MonoBehaviour
         // _armorController = ctrls.First(c => c.gameObject.name == "Armor");
         // _weaponController= ctrls.First(c => c.gameObject.name == "Weapon");
     }
-    
+
     public AnimatorStateInfo GetCurrentStateInfo // 🚨 메서드명 규칙 적용
         => _effectAnimator.GetCurrentAnimatorStateInfo(0);
 
@@ -37,7 +37,7 @@ public class PlayerAnimationSync : MonoBehaviour
         _effectController.NomalAttack(count);
         _weaponController.NomalAttack(count);
     }
-    
+
     public void OverHitAttack(int count)
     {
         _bodyController.OverHitAttack(count);
@@ -92,6 +92,10 @@ public class PlayerAnimationSync : MonoBehaviour
         _bodyController.Jump();
         _effectController.Jump();
         _weaponController.Jump();
+    }
+    public void JumpEffect()
+    {
+        _effectController.JumpEffect();
     }
 
     public void DoubleJump()

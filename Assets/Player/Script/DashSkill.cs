@@ -44,7 +44,7 @@ public class DashSkill : MonoBehaviour
     }
 
 
-    public void TryDash(Vector2 dir, Rigidbody2D rb/*, PlayerAnimatorController animController*/)
+    public void TryDash(Vector2 dir)
     {
         if (dir == Vector2.zero || _isDashing || _currentStacks <= 0)
             return;
@@ -54,36 +54,36 @@ public class DashSkill : MonoBehaviour
 
         _afterimageCount = 0; // 🚨 대시 시작 시 카운트 0으로 초기화
 
-        _dashCoroutine = StartCoroutine(DashCoroutine(dir.normalized, rb));
+        _dashCoroutine = StartCoroutine(DashCoroutine(dir.normalized));
         _currentStacks--;
         StartCoroutine(RechargeStack());
     }
 
-    private IEnumerator DashCoroutine(Vector2 dir, Rigidbody2D rb)
+    private IEnumerator DashCoroutine(Vector2 dir)
     {
         _isDashing = true;
         isInvincible = true;
 
         StartCoroutine(SpawnAfterimages());
 
-        float originalGravity = rb.gravityScale;
+        float originalGravity = _ref._Rb.gravityScale;
         // 🚨 [변경] _sync -> _ref._AnimSync
         if (_ref._AnimSync != null) _ref._AnimSync.Dash();
 
-        rb.gravityScale = 0f;
+        _ref._Rb.gravityScale = 0f;
 
         // 🚨 [변경] _playerMove -> _ref._Move
         float baseSpeed = (_ref._Move != null) ? _ref._Move.speed : 0f;
         float dashSpeed = baseSpeed * dashMultiplier;
 
-        rb.linearVelocity = dir * dashSpeed;
+        _ref._Rb.linearVelocity = dir * dashSpeed;
 
         yield return new WaitForSeconds(dashDuration);
 
-        rb.linearVelocity = Vector2.zero;
-        rb.gravityScale = originalGravity;
+        _ref._Rb.linearVelocity = Vector2.zero;
+        _ref._Rb.gravityScale = originalGravity;
         // 🚨 [변경] _sync -> _ref._AnimSync
-        if (_ref._AnimSync != null) _ref._AnimSync.AirSpeedY(rb.linearVelocity.y);
+        if (_ref._AnimSync != null) _ref._AnimSync.AirSpeedY(_ref._Rb.linearVelocity.y);
 
         _isDashing = false;
         isInvincible = false;

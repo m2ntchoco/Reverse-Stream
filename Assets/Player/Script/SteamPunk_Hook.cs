@@ -51,7 +51,7 @@ public class SteamPunk_Hook : MonoBehaviour
     private Vector2 launchDir;
     private SpriteRenderer _hookSpriteRenderer;
 
-    private void Awake()
+    private void Start()
     {
         // 🚀 자동 할당: 플레이어 관련 컴포넌트
         // 🚨 [변경] PlayerRef 할당 (같은 오브젝트)

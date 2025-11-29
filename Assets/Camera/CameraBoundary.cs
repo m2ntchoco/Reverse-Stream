@@ -44,12 +44,12 @@ public class CameraBoundary : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         // 🚨 2. 어떤 콜라이더든 진입 시 로그가 뜨는지 확인합니다.
-        Debug.Log($"[Trigger Test] Collider Entered by: {other.gameObject.name} (Layer: {other.gameObject.layer})");
+        //Debug.Log($"[Trigger Test] Collider Entered by: {other.gameObject.name} (Layer: {other.gameObject.layer})");
 
         if (other.CompareTag("Player") && _cameraFollower != null)
         {
             // 🚨 3. 플레이어 태그 확인 및 최종 호출 직전 로그를 확인합니다.
-            Debug.Log($"[SUCCESS] Player entered boundary: {gameObject.name}");
+            //Debug.Log($"[SUCCESS] Player entered boundary: {gameObject.name}");
             _cameraFollower.SetCurrentBoundary(this);
         }
     }

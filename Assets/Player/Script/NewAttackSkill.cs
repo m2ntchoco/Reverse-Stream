@@ -22,7 +22,7 @@ public class NewAttackSkill : MonoBehaviour
     // 🚨 [변경] 개별 참조 변수 제거 -> PlayerRef 사용
     private PlayerRef _ref;
 
-    private void Awake()
+    private void Start()
     {
         // 🚨 [변경] PlayerRef 할당
         _ref = GetComponentInParent<PlayerRef>();

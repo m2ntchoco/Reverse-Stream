@@ -146,89 +146,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uC810\uD504-Sheet_0"
+      name: Jump-Sheet_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 512
         height: 512
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.54}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 8109142cbad048620800000000000000
-      internalID: 2775358301716713496
+      spriteID: 2dc6c9e86923e614d9d9a89669eeb1aa
+      internalID: -1146610869
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uC810\uD504-Sheet_1"
+      name: Jump-Sheet_1
       rect:
         serializedVersion: 2
         x: 512
         y: 0
         width: 512
         height: 512
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.54}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: cee401a258dabb300800000000000000
-      internalID: 268999390206643948
+      spriteID: bc65df8447ea93a4a896cacfeba0bb11
+      internalID: -330565169
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uC810\uD504-Sheet_2"
+      name: Jump-Sheet_2
       rect:
         serializedVersion: 2
         x: 1024
         y: 0
         width: 512
         height: 512
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.54}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: ce5abec9bca4faed0800000000000000
-      internalID: -2400617837993679380
+      spriteID: b1607665337239e4abf319d98887b42f
+      internalID: 1539358214
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uC810\uD504-Sheet_3"
+      name: Jump-Sheet_3
       rect:
         serializedVersion: 2
         x: 1536
         y: 0
         width: 512
         height: 512
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.54}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 84e3fd0ad04a5ff00800000000000000
-      internalID: 1150005658303544904
+      spriteID: ee5d1f015cd503b45948e18cf88b902a
+      internalID: 1638300085
       vertices: []
       indices: 
       edges: []
@@ -247,10 +247,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\uC810\uD504-Sheet_0": 2775358301716713496
-      "\uC810\uD504-Sheet_1": 268999390206643948
-      "\uC810\uD504-Sheet_2": -2400617837993679380
-      "\uC810\uD504-Sheet_3": 1150005658303544904
+      Jump-Sheet_0: -1146610869
+      Jump-Sheet_1: -330565169
+      Jump-Sheet_2: 1539358214
+      Jump-Sheet_3: 1638300085
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

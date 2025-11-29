@@ -31,7 +31,7 @@ public class Ground : MonoBehaviour
     private int facingDirection;
 
     // 외부에 공개되는 상태
-    [HideInInspector] public bool isGrounded = false;
+    public bool isGrounded = false;
     [HideInInspector] public bool isOnFloatGround = false;
 
     // 내부 컴포넌트 참조

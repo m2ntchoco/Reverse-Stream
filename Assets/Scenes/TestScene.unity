@@ -218,7 +218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &519420029
 AudioListener:
   m_ObjectHideFlags: 0
@@ -639,8 +639,8 @@ Transform:
   m_GameObject: {fileID: 1145099317}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.84, y: 0.9, z: -5}
-  m_LocalScale: {x: 16.238, y: 1, z: 1}
+  m_LocalPosition: {x: 8.84, y: 0.6033, z: -5}
+  m_LocalScale: {x: 16.238, y: 0.4066, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -664,7 +664,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1267284375
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -787,27 +787,7 @@ CompositeCollider2D:
   m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
-  m_ColliderPaths:
-  - m_Collider: {fileID: 1495586174}
-    m_ColliderPaths:
-    - - X: 175880240
-        Y: 77248656
-      - X: -175880240
-        Y: 77248656
-      - X: -175880240
-        Y: -77248656
-      - X: 175880240
-        Y: -77248656
-  - m_Collider: {fileID: 375542702}
-    m_ColliderPaths:
-    - - X: 378393504
-        Y: 112930488
-      - X: 108709048
-        Y: 112930488
-      - X: 108709048
-        Y: -63265196
-      - X: 378393504
-        Y: -63265196
+  m_ColliderPaths: []
   m_CompositePaths:
     m_Paths:
     - - {x: 17.587996, y: -7.724866}
@@ -865,7 +845,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1379640604
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1288,10 +1268,9 @@ MonoBehaviour:
   _hook: {fileID: 2142095729921833738}
   _hookStart: {fileID: 1317022378807957663}
   hookSpeed: 15
-  maxDistance: 5
+  maxDistance: 0.1
   dashSpeed: 20
-  attachRadius: 0.1
-  hookGravityScale: 0.1
+  attachRadius: 0.5
   segments: 20
   sagAmount: 0.3
   parabolaDuration: 0.5
@@ -1489,8 +1468,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   floatGroundLayerName: FloatGround
-  rayDistance: 1.03
-  rayOriginOffsetY: 0
+  rayDistance: 0.1
+  rayOriginOffsetY: 0.95
   rayOriginOffsetX: 0.05
   spacing: 0.35
   isGrounded: 0
@@ -1781,18 +1760,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
-  jumpForce: 7.5
-  _fallMultiplier: 2.5
-  _ascentMultiplier: 2.5
+  jumpForce: 6.2
+  gravity: 15
+  fallMultiplier: 2.8
+  ascentMultiplier: 2.5
   platformDropTime: 0.5
   jumpThroughTime: 0.3
-  attackLockExtraDrag: 1000
-  _jumpResetCooldown: 0.2
+  jumpResetCooldown: 0.2
   jumpCount: 0
   dashDuration: 0.25
   dashSpeed: 3
   dashCooldown: 5
   isjump: 0
+  y: 0
 --- !u!70 &4861913013702693138
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2041,7 +2021,7 @@ Transform:
   m_GameObject: {fileID: 7479203863367356900}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.93, y: 16.68, z: 0}
+  m_LocalPosition: {x: -5, y: 0.32, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

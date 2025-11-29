@@ -1,137 +1,213 @@
 using UnityEngine;
 using System.Collections;
-using System.Xml.Serialization;
+using UnityEngine.Rendering;
+using Unity.VisualScripting;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMoveController : MonoBehaviour
 {
-
     [Header("이동 & 액션")]
-    [SerializeField] public float speed = 3f;
-    [SerializeField] private float jumpForce = 7.5f;
+    [SerializeField] public float speed = 3f;            // 걷기 속도
+    [SerializeField] private float jumpForce = 7.5f;     // 점프 힘
 
-    [Header("물리 설정")]
-    [Tooltip("하강 시에만 적용되는 중력 가속도 배율")]
-    [SerializeField] private float _fallMultiplier = 2.5f;
-    [Tooltip("점프 버튼을 누르고 있을 때의 상승 중력 배율 (느린 상승 개선)")]
-    [SerializeField] private float _ascentMultiplier = 2.5f;
+    [Header("중력 설정 (수동)")]
+    [SerializeField] private float gravity = 20f;        // 기본 중력
 
-    [Header("하향 점프 설정 및 점프 충돌 무시")]
-    [Tooltip("플랫폼과의 충돌을 무시할 시간 (하향 점프)")]
+    [Header("물리 설정 (점프 궤적 튜닝)")]
+    [Tooltip("하강 시 중력 가속도 배율")]
+    [SerializeField] private float fallMultiplier = 2.5f;
+    [Tooltip("점프 버튼에서 손 뗄 때의 하강 가속도 배율")]
+    [SerializeField] private float ascentMultiplier = 2.5f;
+
+    [Header("하향 점프 & 점프 스루")]
+    [Tooltip("아래 + 점프로 바닥을 통과할 때 충돌 무시 시간")]
     [SerializeField] private float platformDropTime = 0.5f;
-    [Tooltip("플랫폼과의 충돌을 무시할 시간 (점프 스루)")]
+    [Tooltip("점프 직후 점프스루(위로 통과) 충돌 무시 시간")]
     [SerializeField] private float jumpThroughTime = 0.3f;
 
-    [Header("공격 이동 잠금")]
-    [SerializeField] private float attackLockExtraDrag = 1000f;
-
     [Header("점프 버그 방지")]
-    [Tooltip("점프 직후, 점프 카운트 초기화를 막을 시간")]
-    [SerializeField] private float _jumpResetCooldown = 0.2f;
-    private float lastJumpTime = -99f;
+    [Tooltip("점프 직후, 점프 카운트를 바로 리셋하지 않는 쿨타임")]
+    [SerializeField] private float jumpResetCooldown = 0.2f;
 
-    private bool attackLocked = false;
-    private float defaultDrag;
+    private float lastJumpTime = -99f;
 
     public int GetFacingDir => facingDir;
 
     // ===== 상태 플래그 =====
     [SerializeField] public int jumpCount = 0;
-    private int facingDir = 1;
     private const int maxJumps = 2;
+    private int facingDir = 1;
     private float moveInput;
+    // private float verticalVelocity = 0f;   // 수동 중력/점프용 Y속도 -> AddForce 방식으로 변경하며 제거
+    private bool attackLocked = false;
+    private bool isIgnoringPlatform = false;
 
+    // 대쉬 관련 (DashSkill이 처리한다고 가정)
     public float dashDuration = 0.25f;
     public float dashSpeed = 3f;
     public float dashCooldown = 5.0f;
-    private Vector2 dashInputDir;
-    public bool isjump = false;
+    public bool isjump = false; // 애니메이션용 플래그
 
-    private Coroutine _animationSlowRoutine;
-    private Coroutine _stepRoutine;
-    private Coroutine _platformIgnoreRoutine;
+    private Coroutine animationSlowRoutine;
+    private Coroutine stepRoutine;
+    private Coroutine platformIgnoreRoutine;
 
-    // ===== 내부에서 사용할 참조 =====
-    // 🚨 [변경] 개별 참조 변수 제거 -> PlayerRef 사용
+    // ===== 참조 (컴포넌트니까 _ 붙임) =====
     private PlayerRef _ref;
 
-    private void Awake()
+    public float y = 0;
+    private void Start()
     {
-        // 🚨 [변경] PlayerRef 할당
         _ref = GetComponent<PlayerRef>();
-        // 🚨 [변경] 초기값 할당 (_rb -> _ref._Rb)
+        if (_ref == null)
+        {
+            Debug.LogError("PlayerMoveController: PlayerRef 컴포넌트를 찾을 수 없습니다.");
+            return;
+        }
+
+        // AddForce 방식 사용 시, Unity 기본 중력을 끄고 스크립트에서 수동 중력 구현
         if (_ref._Rb != null)
-            defaultDrag = _ref._Rb.linearDamping;
+        {
+            _ref._Rb.gravityScale = 0f;
+        }
     }
 
-    public void Update()
+    private void Update()
     {
         HandleInput();
     }
 
     private void FixedUpdate()
     {
-        // 🚨 [변경] _rb -> _ref._Rb
-        if (_ref._Rb == null) return;
+        HandlePhysicsAndMovement();
+        y = _ref._Rb.linearVelocity.y; // linearVelocity는 Rigidbody2D에서 velocity로 사용
+    }
 
-        float gravityScale = _ref._Rb.gravityScale;
-        float defaultGravity = Physics2D.gravity.y * gravityScale;
-        float extraGravityForce = 0f;
+    /// <summary>
+    /// 수직 속도 계산 및 Rigidbody2D를 이용한 최종 이동 처리.
+    /// </summary>
+    public void HandlePhysicsAndMovement()
+    {
+        if (_ref == null || _ref._Rb == null) return;
 
-        if (_ref._Rb.linearVelocity.y < 0f)
+        // 대시 중이면 이동/중력은 Dash에서 처리한다고 가정하고 스킵
+        if (_ref._Dash != null && _ref._Dash.IsDashing) return;
+
+        // StepForward 코루틴이 돌고 있으면 수동 이동 로직 무시 (공격 스텝 중)
+        if (stepRoutine != null) return;
+
+        float dt = Time.fixedDeltaTime;
+        Vector2 currentVelocity = _ref._Rb.linearVelocity;
+        float verticalVelocity = currentVelocity.y; // 현재 Y 속도를 가져옴
+
+        // 1. 지면 체크
+        bool isGrounded = false;
+        if (_ref._Ground != null)
         {
-            extraGravityForce = defaultGravity * (_fallMultiplier - 1f);
+            isGrounded = _ref._Ground.isGrounded;
         }
-        else if (_ref._Rb.linearVelocity.y > 0f)
+
+        if (isGrounded && !isIgnoringPlatform && verticalVelocity < 0f)
         {
-            if (Input.GetKey(KeyCode.Space))
+            // 땅에 닿는 순간, 점프 쿨타임을 무시하고 즉시 리셋
+            ResetJumpCount(true);
+        }
+
+        // 2. 중력/점프 Y속도 계산 (AddForce 방식을 위한 수동 중력 적용)
+        if (isGrounded && verticalVelocity <= 0f)
+        {
+            // 바닥에 붙어 있을 때 약간의 음수값으로 접지 유지
+            _ref._Rb.linearVelocity = new Vector2(currentVelocity.x, -0.01f);
+        }
+        else
+        {
+            // 수동 중력 가속도 계산
+            float gravityMultiplier = 1f;
+
+            if (verticalVelocity < 0f)
             {
-                extraGravityForce = defaultGravity * (_ascentMultiplier - 1f);
+                // 낙하 중
+                gravityMultiplier = fallMultiplier;
+            }
+            // else if (verticalVelocity > 0f && !Input.GetKey(KeyCode.Space))
+            // {
+            //     // 상승 중인데 스페이스 떼면 빠르게 낙하 전환
+            //     gravityMultiplier = ascentMultiplier;
+            // }
+
+            // 힘을 적용 (질량 1을 가정하면 AddForce(Vector2.down * gravity * multiplier)와 동일)
+            // Rigidbody.velocity를 직접 조작하는 것이 더 정확한 제어를 제공함
+            verticalVelocity -= gravity * gravityMultiplier * dt;
+        }
+
+        // 점프 스루 (위로 관통)
+        if (_ref._Ground != null && !string.IsNullOrEmpty(_ref._Ground.FloatGroundLayerName))
+        {
+            // 위로 상승하는 순간 + 아직 점프스루 코루틴 안 돌고 있을 때 한 번만
+            if (verticalVelocity > 0f && platformIgnoreRoutine == null)
+            {
+                int floatGroundLayer = LayerMask.NameToLayer(_ref._Ground.FloatGroundLayerName);
+                if (floatGroundLayer >= 0)
+                {
+                    StartPlatformIgnore(floatGroundLayer, jumpThroughTime);
+                }
             }
         }
 
-        if (extraGravityForce != 0f)
+        // 3. 수평 속도 계산 (공격 락 걸리면 X 이동 0)
+        float finalMoveInput = attackLocked ? 0f : moveInput;
+
+        // Y 속도는 중력 계산 결과로 업데이트
+        Vector2 vel = currentVelocity;
+        vel.x = finalMoveInput * speed;
+        vel.y = verticalVelocity;
+        _ref._Rb.linearVelocity = vel; // velocity 대신 linearVelocity를 사용했던 원본 코드와의 통일성을 위해 주석 처리
+
+        // 4. 바라보는 방향
+        if (finalMoveInput != 0f)
         {
-            _ref._Rb.linearVelocity += Vector2.up * extraGravityForce * Time.fixedDeltaTime;
+            facingDir = (int)Mathf.Sign(finalMoveInput);
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facingDir;
+            transform.localScale = scale;
         }
 
-        if (attackLocked)
+        // 5. 애니메이션 싱크
+        if (_ref._AnimSync != null)
         {
-            _ref._Rb.linearVelocity = new Vector2(0f, _ref._Rb.linearVelocity.y);
-            return;
+            _ref._AnimSync.AirSpeedY(_ref._Rb.linearVelocity.y);
+            _ref._AnimSync.IsWalking(finalMoveInput != 0f);
         }
-
-        // 🚨 [변경] _dashSkill -> _ref._Dash
-        if (_ref._Dash != null && _ref._Dash.IsDashing)
-        {
-            return;
-        }
-
-        HandleMovement();
     }
 
     public void HandleInput()
     {
+        if (_ref == null) return;
+
+        // 대시 중에는 입력 처리 X
+        if (_ref._Dash != null && _ref._Dash.IsDashing) return;
+
+        // ─ 이동 입력 ─
         moveInput = 0f;
         if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
         else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
 
         bool isDownJumpInput = Input.GetKey(KeyCode.DownArrow) && Input.GetKeyDown(KeyCode.Space);
 
-        // 🚨 [변경] _dashSkill -> _ref._Dash
-        if (_ref._Dash != null && (Input.GetKeyDown(KeyCode.D)))
+        // ─ 대시 ─
+        if (_ref._Dash != null && Input.GetKeyDown(KeyCode.D))
         {
             if (!_ref._Dash.IsDashing)
             {
-                Vector2 dashDir;
-                if (moveInput != 0f) dashDir = new Vector2(moveInput, 0f);
-                else dashDir = new Vector2(GetFacingDir, 0f);
+                Vector2 dashDir = (moveInput != 0f)
+                    ? new Vector2(moveInput, 0f)
+                    : new Vector2(GetFacingDir, 0f);
 
-                if (_platformIgnoreRoutine != null)
+                // 플랫폼 무시 상태가 남아 있으면 초기화
+                if (platformIgnoreRoutine != null)
                 {
-                    StopCoroutine(_platformIgnoreRoutine);
-                    _platformIgnoreRoutine = null;
-
-                    // 🚨 [변경] _ground -> _ref._Ground
+                    StopCoroutine(platformIgnoreRoutine);
+                    platformIgnoreRoutine = null;
                     if (_ref._Ground != null)
                     {
                         int floatGroundLayer = LayerMask.NameToLayer(_ref._Ground.FloatGroundLayerName);
@@ -143,73 +219,54 @@ public class PlayerMoveController : MonoBehaviour
                     }
                 }
 
-                // 🚨 [변경] _rb -> _ref._Rb
-                _ref._Dash.TryDash(dashDir, _ref._Rb);
+                _ref._Dash.TryDash(dashDir);
                 return;
             }
         }
 
-        // 🚨 [변경] _ground -> _ref._Ground
-        if (isDownJumpInput && _ref._Ground != null && _ref._Ground.isGrounded && _ref._Ground.isOnFloatGround)
+        // ─ 하향 점프 (아래 + 점프) ─
+        bool grounded = (_ref._Ground != null) && _ref._Ground.isGrounded;
+        if (isDownJumpInput && grounded && _ref._Ground != null && _ref._Ground.isOnFloatGround)
         {
-            int floatGroundLayer = LayerMask.NameToLayer(_ref._Ground.FloatGroundLayerName);
-
-            if (floatGroundLayer >= 0)
+            int floatLayer = LayerMask.NameToLayer(_ref._Ground.FloatGroundLayerName);
+            if (floatLayer >= 0)
             {
-                StartPlatformIgnore(floatGroundLayer, platformDropTime);
+                StartPlatformIgnore(floatLayer, platformDropTime);
                 return;
             }
         }
 
+        // ─ 일반/이단 점프 ─
         if (Input.GetKeyDown(KeyCode.Space) && jumpCount < maxJumps)
         {
+            // AddForce 방식으로 변경
+            // 기존의 점프 힘(jumpForce)을 속도 변화량으로 보고, AddForce(ForceMode2D.Impulse)를 사용합니다.
+            // Rigidbody.velocity.y를 0으로 만들고 AddForce를 적용하여 일관된 점프 높이를 얻습니다.
+
+            // 현재 Rigidbody2D.velocity.y가 양수이면 (점프 중이면) 그 값을 상쇄하고 AddForce 적용
+            Vector2 currentVelocity = _ref._Rb.linearVelocity;
+            if (currentVelocity.y > 0)
             {
-                // 🚨 [변경] _sync -> _ref._AnimSync, _rb -> _ref._Rb
-                if (_ref._AnimSync != null) _ref._AnimSync.Jump();
-                if (_ref._Rb != null) _ref._Rb.linearVelocity = new Vector2(_ref._Rb.linearVelocity.x, jumpForce);
-
-                // 🚨 [변경] _ground -> _ref._Ground
-                if (_ref._Ground != null) _ref._Ground.isGrounded = false;
-                isjump = true;
-                jumpCount++;
-
-                lastJumpTime = Time.time;
-
-                if (_ref._Ground != null && _ref._Ground.FloatGroundLayerName != null)
-                {
-                    int floatGroundLayer = LayerMask.NameToLayer(_ref._Ground.FloatGroundLayerName);
-                    if (floatGroundLayer >= 0)
-                    {
-                        StartPlatformIgnore(floatGroundLayer, jumpThroughTime);
-                    }
-                }
-
-                StartCoroutine(JumpRoutine());
+                _ref._Rb.linearVelocity = new Vector2(currentVelocity.x, 0f);
             }
-        }
-    }
 
-    public void HandleMovement()
-    {
-        // 🚨 [변경] _dashSkill -> _ref._Dash
-        if (_ref._Dash != null && _ref._Dash.IsDashing) return;
+            // 점프 힘을 Impulse 모드로 적용하여 즉각적인 속도 변화를 줍니다.
+            _ref._Rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-        // 🚨 [변경] _rb -> _ref._Rb
-        if (_ref._Rb != null) _ref._Rb.linearVelocity = new Vector2(moveInput * speed, _ref._Rb.linearVelocity.y);
 
-        if (moveInput != 0f)
-        {
-            facingDir = (int)Mathf.Sign(moveInput);
-            Vector3 scale = transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * facingDir;
-            transform.localScale = scale;
-        }
+            if (_ref._AnimSync != null && jumpCount >= 1)
+            {
+                _ref._AnimSync.Jump();
+                _ref._AnimSync.JumpEffect();
+            }
+            else _ref._AnimSync.Jump();
+            if (_ref._Ground != null) _ref._Ground.isGrounded = false;
 
-        // 🚨 [변경] _sync -> _ref._AnimSync
-        if (_ref._AnimSync != null)
-        {
-            _ref._AnimSync.AirSpeedY(_ref._Rb.linearVelocity.y);
-            _ref._AnimSync.IsWalking(moveInput != 0f);
+            isjump = true;
+            jumpCount++;
+            lastJumpTime = Time.time;
+
+            StartCoroutine(JumpRoutine());
         }
     }
 
@@ -217,90 +274,80 @@ public class PlayerMoveController : MonoBehaviour
     {
         Physics2D.IgnoreLayerCollision(gameObject.layer, layerToIgnore, true);
 
-        // 🚨 [변경] _ground -> _ref._Ground
+        isIgnoringPlatform = true;
         if (_ref._Ground != null)
         {
             _ref._Ground.IgnoreFloatGroundLayer();
         }
 
-        if (_platformIgnoreRoutine != null)
+        if (platformIgnoreRoutine != null)
         {
-            StopCoroutine(_platformIgnoreRoutine);
+            StopCoroutine(platformIgnoreRoutine);
         }
-        _platformIgnoreRoutine = StartCoroutine(PlatformDropResetRoutine(layerToIgnore, duration));
-
-        // 🚨 [변경] _playerCollider -> _ref._Col
-        float colliderHeight = _ref._Col != null ? _ref._Col.bounds.extents.y : 0.5f;
-        float pushUpAmount = colliderHeight + 0.05f;
-
-        // 🚨 [변경] _rb -> _ref._Rb
-        if (_ref._Rb != null && _ref._Rb.linearVelocity.y > 0)
-        {
-            transform.position += new Vector3(0f, pushUpAmount, 0f);
-        }
+        platformIgnoreRoutine = StartCoroutine(PlatformDropResetRoutine(layerToIgnore, duration));
     }
 
-    // 🚀 [수정됨] ignoreCooldown 파라미터 추가
-    // 갈고리에 걸릴 때는 쿨타임과 상관없이 점프 카운트를 초기화해야 하므로 true를 사용합니다.
+    /// <summary>
+    /// 갈고리 등에서 강제로 점프 카운트 초기화 할 때 ignoreCooldown = true 사용.
+    /// </summary>
     public void ResetJumpCount(bool ignoreCooldown = false)
     {
-        if (!ignoreCooldown && Time.time < lastJumpTime + _jumpResetCooldown)
+        if (!ignoreCooldown && Time.time < lastJumpTime + jumpResetCooldown)
         {
             return;
         }
-
         jumpCount = 0;
     }
 
     public void SetAttackLock(bool locked)
     {
         attackLocked = locked;
-        // 🚨 [변경] _rb -> _ref._Rb
-        if (_ref._Rb == null) return;
-
-        if (locked)
-        {
-            _ref._Rb.linearVelocity = new Vector2(0f, _ref._Rb.linearVelocity.y);
-            _ref._Rb.linearDamping = attackLockExtraDrag;
-        }
-        else
-        {
-            _ref._Rb.linearDamping = defaultDrag;
-        }
     }
 
     public void StepForward(float distance, float duration, AnimationCurve curve = null)
     {
-        if (_stepRoutine != null) StopCoroutine(_stepRoutine);
-        _stepRoutine = StartCoroutine(StepRoutine(distance, duration, curve));
+        if (stepRoutine != null) StopCoroutine(stepRoutine);
+        stepRoutine = StartCoroutine(StepRoutine(distance, duration, curve));
     }
 
+    /// <summary>
+    /// 공격 스텝용 슬라이드 이동.
+    /// Y축은 고정, X축만 부드럽게 이동 (공중에서 쓰면 살짝 부자연스러울 수 있음)
+    /// </summary>
     private IEnumerator StepRoutine(float distance, float duration, AnimationCurve curve)
     {
+        if (_ref._Rb == null)
+        {
+            stepRoutine = null;
+            yield break;
+        }
+
         float signedDistance = distance * Mathf.Sign(GetFacingDir);
-        // 🚨 [변경] _rb -> _ref._Rb
         Vector2 start = _ref._Rb.position;
         Vector2 target = start + new Vector2(signedDistance, 0f);
 
         float t = 0f;
         while (t < duration)
         {
-            t += Time.fixedDeltaTime;
+            t += Time.deltaTime;
             float lerp = duration > 0f ? Mathf.Clamp01(t / duration) : 1f;
             float eased = (curve != null) ? curve.Evaluate(lerp) : lerp;
-            Vector2 next = Vector2.Lerp(start, target, eased);
-            if (_ref._Rb != null) _ref._Rb.MovePosition(next);
+
+            float newX = Mathf.Lerp(start.x, target.x, eased);
+            Vector2 nextPos = new Vector2(newX, start.y); // Y는 시작 높이 유지
+            _ref._Rb.MovePosition(nextPos);
+
             yield return new WaitForFixedUpdate();
         }
 
-        if (_ref._Rb != null) _ref._Rb.MovePosition(target);
-        _stepRoutine = null;
+        _ref._Rb.MovePosition(target);
+        stepRoutine = null;
     }
 
     public IEnumerator RecoverAfterAnimationEnd(int stateHash)
     {
         yield return null;
-        _animationSlowRoutine = null;
+        animationSlowRoutine = null;
     }
 
     public IEnumerator JumpRoutine()
@@ -315,12 +362,12 @@ public class PlayerMoveController : MonoBehaviour
 
         Physics2D.IgnoreLayerCollision(gameObject.layer, layerToIgnore, false);
 
-        // 🚨 [변경] _ground -> _ref._Ground
         if (_ref._Ground != null)
         {
             _ref._Ground.ResumeFloatGroundLayer();
         }
+        isIgnoringPlatform = false;
 
-        _platformIgnoreRoutine = null;
+        platformIgnoreRoutine = null;
     }
 }
