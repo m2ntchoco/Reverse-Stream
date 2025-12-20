@@ -29,6 +29,14 @@ public class InventoryUI : MonoBehaviour
     private Label statsLabel;
     private VisualElement iconImage;
 
+    // [추가] 플레이어 스탯 Label 참조
+    private Label _statPhysAtk;
+    private Label _statMagAtk;
+    private Label _statMaxHp;
+    private Label _statCrit;
+    private Label _statMoveSpeed;
+    private Label _statAtkSpeed;
+
     // 컨텍스트 메뉴 관련
     private VisualElement _contextMenu;
     private Button _btnMove;
@@ -79,6 +87,14 @@ public class InventoryUI : MonoBehaviour
         descriptionLabel = _root.Q<Label>("ItemDescription");
         statsLabel = _root.Q<Label>("ItemSubInfo");
         iconImage = _root.Q<VisualElement>("ItemIcon");
+
+        // [추가] 플레이어 스탯 Label 참조 가져오기
+        _statPhysAtk = _root.Q<Label>("Stat_PhysAtk");
+        _statMagAtk = _root.Q<Label>("Stat_MagAtk");
+        _statMaxHp = _root.Q<Label>("Stat_MaxHp");
+        _statCrit = _root.Q<Label>("Stat_Crit");
+        _statMoveSpeed = _root.Q<Label>("Stat_MoveSpeed");
+        _statAtkSpeed = _root.Q<Label>("Stat_AtkSpeed");
 
         _contextMenu = _root.Q<VisualElement>("ContextMenu");
         _btnMove = _root.Q<Button>("BtnMove");
@@ -1368,7 +1384,54 @@ public class InventoryUI : MonoBehaviour
     {
         if (_playerStatsContainer != null) _playerStatsContainer.style.display = DisplayStyle.Flex;
         if (_itemDetailsContainer != null) _itemDetailsContainer.style.display = DisplayStyle.None;
+
+        // [추가] StatDataManager에서 실제 스탯 값 가져와서 업데이트
+        UpdatePlayerStatLabels();
     }
+
+    // [추가] 플레이어 스탯 Label 업데이트
+    private void UpdatePlayerStatLabels()
+{
+    if (StatDataManager.Instance == null) return;
+
+    var data = StatDataManager.Instance;
+
+    // 최대 체력 (절대값 유지)
+    if (_statMaxHp != null)
+        _statMaxHp.text = data.Final_HP.ToString("F0");
+
+    // 물리 공격력: (최종 / 기본) * 100 = 퍼센트
+    if (_statPhysAtk != null)
+    {
+        float physAtkPercent = (data.Final_PhyAtk / data.Base_Atk) * 100f;
+        _statPhysAtk.text = $"{physAtkPercent:F0}%";
+    }
+
+    // 마법 공격력
+    if (_statMagAtk != null)
+    {
+        float magAtkPercent = (data.Final_MagAtk / data.Base_Atk) * 100f;
+        _statMagAtk.text = $"{magAtkPercent:F0}%";
+    }
+
+    // 치명타 확률 (절대값 유지)
+    if (_statCrit != null)
+        _statCrit.text = $"{(data.Final_CritChance * 100):F1}%";
+
+    //이동 속도
+    if (_statMoveSpeed != null)
+        {
+        float moveSpeedPercent = (data.Final_MoveSpeed / data.Base_MoveSpeed) * 100f;
+        _statMagAtk.text = $"{moveSpeedPercent:F0}%";
+    }
+
+    // 공격 속도
+    if (_statAtkSpeed != null)
+    {
+        float atkSpeedPercent = (data.Final_AtkSpeed / data.Base_AtkSpeed) * 100f;
+        _statAtkSpeed.text = $"{atkSpeedPercent:F0}%";
+    }
+}
 
     private void ShowItemDetails(ItemData item)
     {

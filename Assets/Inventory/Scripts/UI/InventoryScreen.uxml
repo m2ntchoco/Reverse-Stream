@@ -63,6 +63,15 @@
                         <ui:Label text="치명타 확률" class="stat-label" />
                         <ui:Label name="Stat_Crit" text="5%" class="stat-value" />
                     </ui:VisualElement>
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="이동 속도" class="stat-label" />
+                        <ui:Label name="Stat_MoveSpeed" text="5%" class="stat-value" />
+                    </ui:VisualElement>
+                    //공격 속도
+                    <ui:VisualElement class="stat-row">
+                        <ui:Label text="공격 속도" class="stat-label" />
+                        <ui:Label name="Stat_AtkSpeed" text="5%" class="stat-value" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
