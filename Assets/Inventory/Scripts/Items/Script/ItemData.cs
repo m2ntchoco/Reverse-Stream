@@ -13,11 +13,12 @@ public class ItemData : ScriptableObject
     public int count = 1;
 
     // 아이템 스탯 들어갈 자리
-    public int InhanceLevel;
-    public int HP;
-    public int MagicDeal;
-    public int PhysicalDeal;
-    public int Defense;
+    public float bonusHp;
+    public float bonusDef;
+    public float bonusPhyAtk;
+    public float bonusMagAtk;
+    public float bonusCritChance;
+    public float bonusCritDmg;
     [TextArea]
     public string description;
     [TextArea]

@@ -6,7 +6,8 @@ using System.Linq;
 public class InventoryUI : MonoBehaviour
 {
     public UIDocument uiDocument;
-    
+    private bool _isOpen = false; 
+
     public int columns = 3;
     public int rows = 3;
 
@@ -76,6 +77,12 @@ public class InventoryUI : MonoBehaviour
         var doc = uiDocument != null ? uiDocument : GetComponent<UIDocument>();
         if (doc == null) return;
 
+        uiDocument = GetComponent<UIDocument>();
+        if (uiDocument == null) return;
+
+        _root = uiDocument.rootVisualElement;
+        CloseInventory(); // 기본적으로 닫힌 상태로 설정
+
         _root = doc.rootVisualElement;
         _root.RegisterCallback<PointerDownEvent>(OnRootClicked);
 
@@ -113,6 +120,22 @@ public class InventoryUI : MonoBehaviour
         int totalGridSize = rows * columns;
         _gridItems = new ItemData[totalGridSize];
 
+        if (ItemDataManager.Instance != null)
+        {
+            // ItemDataManager의 데이터를 기반으로 initialItems를 동기화
+            initialItems.Clear();
+            foreach (var itemName in ItemDataManager.Instance.itemData.equipment_inventory)
+            {
+                var item = Resources.Load<ItemData>($"Items/{itemName}");
+                if (item != null)
+                {
+                    initialItems.Add(item);
+                }
+            }
+
+            // UI 갱신
+            DistributeItems();
+        }
         // [추가] 시너지 매니저 찾기 및 초기화
         InitializeSynergySystem();
 
@@ -1174,7 +1197,7 @@ public class InventoryUI : MonoBehaviour
     }
 
     // UI 갱신 함수
-    void DistributeItems()
+    public void DistributeItems()
     {
         // 1. 장비 슬롯 갱신 (기존 방식: initialItems 리스트 전체 검색)
         foreach (var slot in equipmentSlots) SetSlotItem(slot, null, true, -1);
@@ -1263,6 +1286,14 @@ public class InventoryUI : MonoBehaviour
             _isMovingItem = false;
             DeselectAllSlots();
             return;
+        }
+        else if (info.item != null)
+        {
+            // ItemDataManager에 아이템 추가
+            if (ItemDataManager.Instance != null)
+            {
+                ItemDataManager.Instance.AddItem(info.item.id);
+            }
         }
 
         // 2. 일반 클릭
@@ -1582,111 +1613,133 @@ public class InventoryUI : MonoBehaviour
             Debug.Log("=== UI 컨테이너 순서 재정렬 완료 ===");
     }
 
-    // [추가] Inspector 변경사항 실시간 반영
-#if UNITY_EDITOR
-void OnValidate()
-{
-    // Editor 모드에서만 실행
-    if (!Application.isPlaying) return;
-    
-    // UI가 초기화되지 않았으면 실행하지 않음
-    if (_root == null || _gridItems == null) return;
-    
-    if (enableSynergyOrderDebug)
-        Debug.Log("[OnValidate] Inspector에서 Initial Items 변경 감지됨");
-    
-    // 변경사항을 게임에 반영
-    StartCoroutine(RefreshUINextFrame());
-}
-
-// [추가] 다음 프레임에 UI 갱신 (OnValidate가 여러 번 호출되는 것을 방지)
-private System.Collections.IEnumerator RefreshUINextFrame()
-{
-    yield return null; // 한 프레임 대기
-    
-    if (enableSynergyOrderDebug)
-        Debug.Log("[RefreshUINextFrame] UI 갱신 실행");
+        // [추가] Inspector 변경사항 실시간 반영
+    #if UNITY_EDITOR
+    void OnValidate()
+    {
+        // Editor 모드에서만 실행
+        if (!Application.isPlaying) return;
         
-    RefreshInventoryFromInspector();
-}
-#endif
-
-// [새로 추가] Inspector의 Initial Items를 게임 상태에 반영
-private void RefreshInventoryFromInspector()
-{
-    if (_gridItems == null) return;
-    
-    if (enableSynergyOrderDebug)
-    {
-        Debug.Log($"[RefreshInventoryFromInspector] Initial Items 개수: {initialItems.Count}");
-        foreach (var item in initialItems)
-        {
-            if (item != null)
-                Debug.Log($"  - {item.itemName} (Type: {item.itemType})");
-        }
-    }
-    
-    // 기존 그리드 초기화
-    for (int i = 0; i < _gridItems.Length; i++)
-        _gridItems[i] = null;
-    
-    // Inspector의 Initial Items를 다시 그리드에 배치
-    LoadInitialItemsToGrid();
-    
-    // UI 갱신
-    DistributeItems();
-    
-    if (enableSynergyOrderDebug)
-        Debug.Log("[RefreshInventoryFromInspector] UI 갱신 완료");
-}
-
-// [추가] 런타임 Inspector 변경 감지용 변수들
-[Header("런타임 Inspector 감지")]
-[SerializeField] private bool enableRuntimeInspectorWatch = true;
-private int _lastInitialItemsCount = 0;
-private List<ItemData> _lastInitialItemsSnapshot = new List<ItemData>();
-
-void Update()
-{
-    // Inspector 변경 감지가 활성화되어 있고, 게임이 실행 중일 때만
-    if (!enableRuntimeInspectorWatch || !Application.isPlaying) return;
-    
-    // Initial Items 배열에 변화가 있는지 확인
-    if (HasInitialItemsChanged())
-    {
+        // UI가 초기화되지 않았으면 실행하지 않음
+        if (_root == null || _gridItems == null) return;
+        
         if (enableSynergyOrderDebug)
-            Debug.Log("[Update] Runtime에서 Initial Items 변경 감지됨");
+            Debug.Log("[OnValidate] Inspector에서 Initial Items 변경 감지됨");
+        
+        // 변경사항을 게임에 반영
+        StartCoroutine(RefreshUINextFrame());
+    }
+
+    // [추가] 다음 프레임에 UI 갱신 (OnValidate가 여러 번 호출되는 것을 방지)
+    private System.Collections.IEnumerator RefreshUINextFrame()
+    {
+        yield return null; // 한 프레임 대기
+        
+        if (enableSynergyOrderDebug)
+            Debug.Log("[RefreshUINextFrame] UI 갱신 실행");
             
         RefreshInventoryFromInspector();
-        UpdateInitialItemsSnapshot();
     }
-}
+    #endif
 
-// [추가] Initial Items 배열이 변경되었는지 확인
-private bool HasInitialItemsChanged()
-{
-    // 1. 배열 크기가 다르면 변경됨
-    if (initialItems.Count != _lastInitialItemsCount)
-        return true;
-    
-    // 2. 각 요소를 비교
-    for (int i = 0; i < initialItems.Count; i++)
+    // [새로 추가] Inspector의 Initial Items를 게임 상태에 반영
+    private void RefreshInventoryFromInspector()
     {
-        if (i >= _lastInitialItemsSnapshot.Count)
-            return true;
-            
-        if (initialItems[i] != _lastInitialItemsSnapshot[i])
-            return true;
+        if (_gridItems == null) return;
+        
+        if (enableSynergyOrderDebug)
+        {
+            Debug.Log($"[RefreshInventoryFromInspector] Initial Items 개수: {initialItems.Count}");
+            foreach (var item in initialItems)
+            {
+                if (item != null)
+                    Debug.Log($"  - {item.itemName} (Type: {item.itemType})");
+            }
+        }
+        
+        // 기존 그리드 초기화
+        for (int i = 0; i < _gridItems.Length; i++)
+            _gridItems[i] = null;
+        
+        // Inspector의 Initial Items를 다시 그리드에 배치
+        LoadInitialItemsToGrid();
+        
+        // UI 갱신
+        DistributeItems();
+        
+        if (enableSynergyOrderDebug)
+            Debug.Log("[RefreshInventoryFromInspector] UI 갱신 완료");
     }
-    
-    return false;
-}
 
-// [추가] 현재 Initial Items 상태를 스냅샷으로 저장
-private void UpdateInitialItemsSnapshot()
-{
-    _lastInitialItemsCount = initialItems.Count;
-    _lastInitialItemsSnapshot.Clear();
-    _lastInitialItemsSnapshot.AddRange(initialItems);
-}
+    // [추가] 런타임 Inspector 변경 감지용 변수들
+    [Header("런타임 Inspector 감지")]
+    [SerializeField] private bool enableRuntimeInspectorWatch = true;
+    private int _lastInitialItemsCount = 0;
+    private List<ItemData> _lastInitialItemsSnapshot = new List<ItemData>();
+
+    void Update()
+    {
+        // Inspector 변경 감지가 활성화되어 있고, 게임이 실행 중일 때만
+        if (!enableRuntimeInspectorWatch || !Application.isPlaying) return;
+        
+        if (Input.GetKeyDown(KeyCode.I))
+            {
+                if (_isOpen)
+                    CloseInventory();
+                else
+                    OpenInventory();
+            }
+        
+        // Initial Items 배열에 변화가 있는지 확인
+        if (HasInitialItemsChanged())
+        {
+            if (enableSynergyOrderDebug)
+                Debug.Log("[Update] Runtime에서 Initial Items 변경 감지됨");
+                
+            RefreshInventoryFromInspector();
+            UpdateInitialItemsSnapshot();
+        }
+
+        
+
+    }
+
+    // [추가] Initial Items 배열이 변경되었는지 확인
+    private bool HasInitialItemsChanged()
+    {
+        // 1. 배열 크기가 다르면 변경됨
+        if (initialItems.Count != _lastInitialItemsCount)
+            return true;
+        
+        // 2. 각 요소를 비교
+        for (int i = 0; i < initialItems.Count; i++)
+        {
+            if (i >= _lastInitialItemsSnapshot.Count)
+                return true;
+                
+            if (initialItems[i] != _lastInitialItemsSnapshot[i])
+                return true;
+        }
+        
+        return false;
+    }
+
+    // [추가] 현재 Initial Items 상태를 스냅샷으로 저장
+    private void UpdateInitialItemsSnapshot()
+    {
+        _lastInitialItemsCount = initialItems.Count;
+        _lastInitialItemsSnapshot.Clear();
+        _lastInitialItemsSnapshot.AddRange(initialItems);
+    }
+    private void OpenInventory()
+    {
+        _isOpen = true;
+        _root.style.display = DisplayStyle.Flex; // UI 표시
+    }
+
+    private void CloseInventory()
+    {
+        _isOpen = false;
+        _root.style.display = DisplayStyle.None; // UI 숨기기
+    }
 }

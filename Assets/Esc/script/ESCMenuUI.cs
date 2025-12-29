@@ -64,6 +64,7 @@ public class ESCMenuUI : MonoBehaviour
         SetupKeyButton("Key_Interact", "Interact");
         SetupKeyButton("Key_Skill1", "Skill1");
         SetupKeyButton("Key_Skill2", "Skill2");
+        //SetupKeyButton("Key_Inventory", "Inventory");
 
         _sliderMaster = SetupSlider("SliderMaster", "ValMaster", v => AudioListener.volume = v);
         _sliderBGM = SetupSlider("SliderBGM", "ValBGM", v => { });

@@ -69,6 +69,7 @@ public class StatDataManager : MonoBehaviour
         else { Destroy(gameObject); return; }
 
         filePath = Path.Combine(Application.persistentDataPath, "Player_data.json");
+        Debug.Log(filePath);
         LoadData();
     }
 
