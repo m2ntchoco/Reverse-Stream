@@ -3,7 +3,10 @@ using System.Collections;
 
 public class SteamPunk_Hook : MonoBehaviour
 {
-    // 🚨 컴포넌트 참조 변수 규칙 적용
+
+    [Header("레이어 설정")]
+    [SerializeField] private LayerMask ringMask;
+
     [Header("라인 렌더러 설정")]
     public LineRenderer _chainLR;
     public Transform _hook;
@@ -14,10 +17,12 @@ public class SteamPunk_Hook : MonoBehaviour
     public float maxDistance = 5f;
     public float dashSpeed = 20f;
     public float attachRadius = 0.1f;
-    [SerializeField] float hookGravityScale = 0.1f; // 사용되지 않음
     private float hookDetachTimer = 0f;
     public int segments = 20;
     public float sagAmount = 0.3f;
+
+    // 💡 [추가됨] 갈고리 부착 최대 지속 시간
+    public float maxAttachDuration = 0.7f;
 
     [Header("포물선 이동 설정")]
     public float parabolaDuration = 0.5f;
@@ -209,7 +214,10 @@ public class SteamPunk_Hook : MonoBehaviour
 
     private void DetectRingAndAttach()
     {
-        Collider2D hit = Physics2D.OverlapCircle(_hook.position, attachRadius);
+        // 🚨 [수정됨] OverlapCircle에 레이어 마스크(ringMask)를 추가하여 해당 레이어의 콜라이더만 감지
+        Collider2D hit = Physics2D.OverlapCircle(_hook.position, attachRadius, ringMask);
+
+        // 감지된 콜라이더가 있고, 태그가 "RING"일 때
         if (hit != null && hit.CompareTag("RING"))
         {
             _hook.position = hit.ClosestPoint(_hook.position);
@@ -217,24 +225,25 @@ public class SteamPunk_Hook : MonoBehaviour
 
             if (_ref._Move != null)
             {
-                // 🚀 [수정됨] 강제 리셋 (true 파라미터 추가 예정)
-                // 방금 점프했더라도 갈고리에 걸리면 즉시 점프 가능 상태로 만듭니다.
-                // 🚨 [변경] _playerMove -> _ref._Move
+                // 🚀 강제 리셋 (true 파라미터 추가)
                 _ref._Move.ResetJumpCount(true);
+
+                // 💡 [추가/수정] 갈고리 부착 시 중력 배율을 0으로 설정
+                _ref._Move.SetGravityScale(0f);
             }
 
             isHookActive = false;
             isLineMax = false;
 
-            // 🚨 [변경] _playerRb -> _ref._Rb
             if (_ref._Rb != null)
             {
+                // 🚨 Rigidbody2D의 선형 속도를 0으로 설정
                 _ref._Rb.linearVelocity = Vector2.zero;
             }
 
-            // 🚨 [변경] _playerMove -> _ref._Move
             if (_ref._Move != null)
             {
+                // 🚨 플레이어의 공격을 잠금
                 _ref._Move.SetAttackLock(true);
             }
 
@@ -260,14 +269,14 @@ public class SteamPunk_Hook : MonoBehaviour
         // 🚀 [추가됨] 점프(Space) 입력 시 갈고리 해제 및 점프 허용
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // true를 전달하여 속도를 0으로 만들지 않고 연결만 끊습니다.
-            // 이후 PlayerMoveController가 같은 프레임에 점프 힘을 가하게 됩니다.
+            // true를 전달하여 속도를 0으로 만들지 않고 연결만 끊고 중력은 복원합니다.
             ResetHookState(true);
             return;
         }
 
         // ── 자동 해제 ────────────────────────────
-        if (hookDetachTimer > 0.7f)
+        // 💡 [수정됨] maxAttachDuration 변수 사용
+        if (hookDetachTimer > maxAttachDuration)
         {
             ResetHookState();
         }
@@ -298,9 +307,14 @@ public class SteamPunk_Hook : MonoBehaviour
         if (_chainLR != null && _chainLR.enabled)
             _chainLR.enabled = false;
 
+        // 💡 [추가/수정] 갈고리 해제 시 중력 배율을 1.0f(원래 값)로 복원
+        if (_ref._Move != null)
+        {
+            _ref._Move.ResetJumpCount(true);
+            _ref._Move.SetGravityScale(PlayerMoveController.origingravityMultiplier);
+        }
+
         // 🚀 [수정됨] 점프 중이 아닐 때만 속도를 0으로 만듭니다.
-        // 점프 중이라면 PlayerMoveController가 가하는 점프 힘을 보존해야 합니다.
-        // 🚨 [변경] _playerRb -> _ref._Rb
         if (!isJumping && _ref._Rb != null)
         {
             _ref._Rb.linearVelocity = Vector2.zero;
@@ -353,6 +367,7 @@ public class SteamPunk_Hook : MonoBehaviour
         isHookActive = false;
         isLineMax = false;
 
+        // 중력 복원 및 상태 초기화 포함
         ResetHookState();
 
         yield break;

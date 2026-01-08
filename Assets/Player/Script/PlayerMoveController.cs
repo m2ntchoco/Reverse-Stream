@@ -7,17 +7,17 @@ using Unity.VisualScripting;
 public class PlayerMoveController : MonoBehaviour
 {
     [Header("이동 & 액션")]
-    [SerializeField] public float speed = 3f;            // 걷기 속도
-    [SerializeField] private float jumpForce = 7.5f;     // 점프 힘
+    [SerializeField] public float speed = 3f; 			 // 걷기 속도
+    [SerializeField] private float jumpForce = 7.5f; 	 // 점프 힘
 
     [Header("중력 설정 (수동)")]
-    [SerializeField] private float gravity = 20f;        // 기본 중력
+    [SerializeField] private float gravity = 20f; 		 // 기본 중력
+    public const float origingravityMultiplier = 1.0f;
+    public float currentGravityMultiplier { get; private set; } = origingravityMultiplier; 		 // 💡 [추가됨] 현재 적용 중인 중력 배율 (1.0f이 기본)
 
     [Header("물리 설정 (점프 궤적 튜닝)")]
     [Tooltip("하강 시 중력 가속도 배율")]
     [SerializeField] private float fallMultiplier = 2.5f;
-    [Tooltip("점프 버튼에서 손 뗄 때의 하강 가속도 배율")]
-    [SerializeField] private float ascentMultiplier = 2.5f;
 
     [Header("하향 점프 & 점프 스루")]
     [Tooltip("아래 + 점프로 바닥을 통과할 때 충돌 무시 시간")]
@@ -38,7 +38,6 @@ public class PlayerMoveController : MonoBehaviour
     private const int maxJumps = 2;
     private int facingDir = 1;
     private float moveInput;
-    // private float verticalVelocity = 0f;   // 수동 중력/점프용 Y속도 -> AddForce 방식으로 변경하며 제거
     private bool attackLocked = false;
     private bool isIgnoringPlatform = false;
 
@@ -48,9 +47,10 @@ public class PlayerMoveController : MonoBehaviour
     public float dashCooldown = 5.0f;
     public bool isjump = false; // 애니메이션용 플래그
 
-    private Coroutine animationSlowRoutine;
+    //private Coroutine animationSlowRoutine;
     private Coroutine stepRoutine;
     private Coroutine platformIgnoreRoutine;
+    private Coroutine jumpRoutine;
 
     // ===== 참조 (컴포넌트니까 _ 붙임) =====
     private PlayerRef _ref;
@@ -121,23 +121,26 @@ public class PlayerMoveController : MonoBehaviour
         }
         else
         {
-            // 수동 중력 가속도 계산
-            float gravityMultiplier = 1f;
+            // 🚨 [수정됨] 현재 설정된 중력 배율(currentGravityMultiplier)을 사용
+            float gravityMultiplier = currentGravityMultiplier;
 
             if (verticalVelocity < 0f)
             {
                 // 낙하 중
-                gravityMultiplier = fallMultiplier;
+                gravityMultiplier *= fallMultiplier;
             }
             // else if (verticalVelocity > 0f && !Input.GetKey(KeyCode.Space))
             // {
-            //     // 상승 중인데 스페이스 떼면 빠르게 낙하 전환
-            //     gravityMultiplier = ascentMultiplier;
+            //     // 상승 중인데 스페이스 떼면 빠르게 낙하 전환
+            //     gravityMultiplier = ascentMultiplier;
             // }
 
-            // 힘을 적용 (질량 1을 가정하면 AddForce(Vector2.down * gravity * multiplier)와 동일)
-            // Rigidbody.velocity를 직접 조작하는 것이 더 정확한 제어를 제공함
-            verticalVelocity -= gravity * gravityMultiplier * dt;
+            // 🚨 [수정됨] 중력 배율이 0보다 클 때만 속도에 영향을 줍니다.
+            if (gravityMultiplier > 0f)
+            {
+                // Rigidbody.velocity를 직접 조작하는 것이 더 정확한 제어를 제공함
+                verticalVelocity -= gravity * gravityMultiplier * dt;
+            }
         }
 
         // 점프 스루 (위로 관통)
@@ -266,11 +269,12 @@ public class PlayerMoveController : MonoBehaviour
             jumpCount++;
             lastJumpTime = Time.time;
 
-            StartCoroutine(JumpRoutine());
+            if (jumpRoutine != null) StopCoroutine(jumpRoutine);
+            jumpRoutine = StartCoroutine(JumpRoutine());
         }
     }
 
-    private void StartPlatformIgnore(int layerToIgnore, float duration)
+    public void StartPlatformIgnore(int layerToIgnore, float duration)
     {
         Physics2D.IgnoreLayerCollision(gameObject.layer, layerToIgnore, true);
 
@@ -302,6 +306,19 @@ public class PlayerMoveController : MonoBehaviour
     public void SetAttackLock(bool locked)
     {
         attackLocked = locked;
+    }
+
+    // 💡 [추가됨] 외부(Hook)에서 중력 배율을 설정하는 메서드
+    public void SetGravityScale(float scale)
+    {
+        currentGravityMultiplier = scale;
+
+        // 🚀 [추가됨] 중력이 0이 될 때 플레이어의 수직 속도를 0으로 만들어야 부자연스럽게 떨어지지 않습니다.
+        if (scale == 0f && _ref._Rb != null)
+        {
+            Vector2 currentVelocity = _ref._Rb.linearVelocity;
+            _ref._Rb.linearVelocity = new Vector2(currentVelocity.x, 0f);
+        }
     }
 
     public void StepForward(float distance, float duration, AnimationCurve curve = null)
@@ -344,16 +361,17 @@ public class PlayerMoveController : MonoBehaviour
         stepRoutine = null;
     }
 
-    public IEnumerator RecoverAfterAnimationEnd(int stateHash)
-    {
-        yield return null;
-        animationSlowRoutine = null;
-    }
+    // public IEnumerator RecoverAfterAnimationEnd(int stateHash)
+    // {
+    //     yield return null;
+    //     animationSlowRoutine = null;
+    // }
 
     public IEnumerator JumpRoutine()
     {
         yield return null;
         isjump = false;
+        jumpRoutine = null;
     }
 
     private IEnumerator PlatformDropResetRoutine(int layerToIgnore, float duration)
