@@ -1,3 +1,4 @@
+// 플레이어를 놓친 후, 마지막으로 플레이어가 보였던 위치로 이동하여 주변을 수색하는 행동을 담당하는 스크립트
 using UnityEngine;
 
 public class SearchState : IEnemyState

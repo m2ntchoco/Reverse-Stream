@@ -35,7 +35,7 @@ public class EnemyAI : MonoBehaviour, IHealth
     public bool playerAttackable = false;
     public float attackRange = 2f;
     public EnemyAI currentLeader = null;
-
+    public AttackIndicator attackVisualizer;
     //플레이어
     public Vector3 player;
     private Transform playerT;
@@ -151,6 +151,12 @@ public class EnemyAI : MonoBehaviour, IHealth
         dwarfbuster = GetComponent<DwarfBusterBullet>();
         myCollider = GetComponent<Collider2D>(); //자신의 콜라이더 가져오기
         DebugLogLoadedData();
+
+        if (attackVisualizer != null)
+        {
+            // (스프라이트는 메쉬 방식이라 안 쓰지만, 호환성을 위해 null 전달)
+            attackVisualizer.Setup(null, speciesData.indicatorColor, speciesData.attackAngle);
+        }
     }
 
 
@@ -353,22 +359,69 @@ public class EnemyAI : MonoBehaviour, IHealth
         DealAreaDamage(attackPoint.position, attackRangeradius, speciesData.SAttackDamage);
     }
 
-    public void DealAreaDamage(Vector2 attackPoint, float radius, int damage)
+    public void DealAreaDamage(Vector2 point, float radius, int damage)
     {
         float finalDamage = damage;
         if(currentLeader != null && !currentLeader.IsDeath)
         {
-            finalDamage *= speciesData.leaderBuffDamageMultiplier; //리더 버프 적용
+            finalDamage *= speciesData.leaderBuffDamageMultiplier;
         }
-        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint, radius, playerLayer);
+
+        Collider2D attackCol = attackPoint.GetComponent<Collider2D>();
+        Collider2D[] hits = new Collider2D[0];
+
+        // 1. 일단 범위(도형) 안에 있는 모든 적을 가져옴 (기존 로직)
+        if (attackCol != null)
+        {
+            if (attackCol is BoxCollider2D box)
+            {
+                hits = Physics2D.OverlapBoxAll(box.bounds.center, box.bounds.size, box.transform.eulerAngles.z, playerLayer);
+            }
+            else if (attackCol is CapsuleCollider2D capsule)
+            {
+                hits = Physics2D.OverlapCapsuleAll(capsule.bounds.center, capsule.size, capsule.direction, capsule.transform.eulerAngles.z, playerLayer);
+            }
+            else if (attackCol is CircleCollider2D circle)
+            {
+                float realRadius = circle.radius * Mathf.Max(circle.transform.lossyScale.x, circle.transform.lossyScale.y);
+                hits = Physics2D.OverlapCircleAll(circle.bounds.center, realRadius, playerLayer);
+            }
+        }
+        else
+        {
+            hits = Physics2D.OverlapCircleAll(point, radius, playerLayer);
+        }
+
+        // 2. [추가] 부채꼴 각도 계산 (원형 콜라이더일 때만 적용)
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent<PlayerHealth>(out var playerHealth))
             {
+                // ★ 부채꼴 판정 로직 ★
+                // (공격 범위가 원형이고, 각도가 360도보다 작을 때만 계산)
+                if (attackCol is CircleCollider2D && speciesData.attackAngle < 360f)
+                {
+                    // 몬스터가 보는 방향 (오른쪽: 1, 왼쪽: -1)
+                    // (EnemyAI는 Scale.x로 방향을 돌리므로 이를 기준으로 잡습니다)
+                    Vector2 facingDir = transform.localScale.x < 0 ? Vector2.left : Vector2.right;
+                    
+                    // 몬스터 -> 플레이어 방향 벡터
+                    Vector2 dirToTarget = (hit.transform.position - transform.position).normalized;
+
+                    // 두 벡터 사이의 각도 계산 (0 ~ 180도)
+                    float angleToTarget = Vector2.Angle(facingDir, dirToTarget);
+
+                    // 각도가 설정된 범위(절반)보다 크면 -> 빗나감!
+                    if (angleToTarget > speciesData.attackAngle * 0.5f)
+                    {
+                        continue; // 데미지 안 주고 넘어감
+                    }
+                }
+
+                // 3. 데미지 적용 (피격)
                 float kbForce = Random.Range(minKnockbackForce, maxKnockbackForce);
                 float kbUpForce = Random.Range(minKnockbackUpwardForce, maxKnockbackUpwardForce);
                 playerHealth.TakeDamage((int)finalDamage, transform, kbForce, kbUpForce);
-                //Debug.Log($"피격! 넉백 힘: {kbForce:F2}, 상승 힘: {kbUpForce:F2}");
             }
         }
     }

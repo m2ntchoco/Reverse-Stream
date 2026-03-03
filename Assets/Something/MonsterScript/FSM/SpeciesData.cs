@@ -1,3 +1,5 @@
+// 몬스터의 종족별 데이터를 정의하는 ScriptableObject
+// 유니티 툴 내에서 데이터 추가 방법 : Assets -> Create -> AI -> SpeciesData
 using UnityEngine;
 public enum AttackPatternType 
 {
@@ -22,6 +24,9 @@ public class SpeciesData : ScriptableObject
     [Header("3. 기본 스탯 (EnemyAI.cs에서 가져옴)")]
     public int maxHP = 100;
     public float attackRange = 2f;
+    [Range(0f, 360f)]
+    public float attackAngle = 360f;
+    public Color indicatorColor = new Color(1f, 0f, 0f, 0.3f);    
     public int NAttackDamage = 20;
     public int SAttackDamage = 40;
     public float attackCooldown = 1.5f;

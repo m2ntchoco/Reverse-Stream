@@ -1,3 +1,5 @@
+// 추적에 관한 스크립트
+// 추적 및 포위 전술 로직
 using Unity.VisualScripting;
 using UnityEngine;
 

@@ -1,3 +1,4 @@
+// 용기가 일정 이하로 떨어졌을 때 도망치는 행동을 담당하는 스크립트
 using UnityEngine;
 
 public class FleeState : IEnemyState

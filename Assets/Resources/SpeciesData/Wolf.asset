@@ -17,9 +17,11 @@ MonoBehaviour:
   aggression: 5
   maxHP: 4545454
   attackRange: 2
+  attackAngle: 90
+  indicatorColor: {r: 1, g: 0, b: 0, a: 0.3}
   NAttackDamage: 40
   SAttackDamage: 60
-  attackCooldown: 1.5
+  attackCooldown: 3.5
   patrolSpeed: 2
   chaseSpeed: 4
   detectionRadius: 8
@@ -42,3 +44,9 @@ MonoBehaviour:
   busterAttackSpeed: 5
   enableFlanking: 1
   flankSpacing: 2
+  isLeader: 0
+  leaderBuffDamageMultiplier: 1.5
+  commandRadius: 15
+  useBerserk: 1
+  berserkThreshold: 0.4
+  berserkSpeedMultiplier: 2

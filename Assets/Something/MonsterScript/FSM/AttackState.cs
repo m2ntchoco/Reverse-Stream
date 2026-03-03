@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections;
 public class AttackState : IEnemyState
 {
     private float StateCoolDown = 1f;
@@ -21,7 +21,10 @@ public class AttackState : IEnemyState
         enemy.PrepareForAttack();
         enemy.GetRigidbody().linearVelocity = new Vector2(0, enemy.GetRigidbody().linearVelocity.y);
         Debug.Log("�����غ���");
-
+        if(ani != null)
+        {
+            ani.SetMoving(false);
+        }
     }
 
     public void Update()
@@ -35,6 +38,7 @@ public class AttackState : IEnemyState
             {
                 enemy.AlertNearbyAllies(); // 경보 발령
             }
+            enemy.StartCoroutine(AttackRoutine());
             // '데이터'에 저장된 공격 타입으로 분기
             // 만약 공격타입 추가할때는 SpeciesData.cs의 AttackPatternType의 enum도 수정하고 여기에도 추가할것!
             switch (enemy.speciesData.attackType)
@@ -122,10 +126,40 @@ public class AttackState : IEnemyState
         ani.NAttack(); // (애니메이션 이름이 NAttack이지만 WolfAttack 전용일 수 있음)
         enemy.cooldown = enemy.speciesData.attackCooldown * 1.2f;
     }
+    IEnumerator AttackRoutine()
+    {
+        // 1. [시각화 ON] 공격 범위 표시 (빨간 원)
+        if (enemy.attackVisualizer != null)
+        {
+            // 몬스터의 공격 범위(radius)만큼 원을 그림
+            enemy.attackVisualizer.Show();
+        }
 
+        // 2. 선딜레이 대기 (플레이어가 보고 피할 시간)
+        // (SpeciesData에 attackWindUpTime 변수가 없다면 그냥 0.5f 사용)
+        float delay = 0.5f; // enemy.speciesData.attackWindUpTime;
+        yield return new WaitForSeconds(delay);
+
+        // 3. [시각화 OFF] 공격 나갈 때 원 지우기
+        if (enemy.attackVisualizer != null)
+        {
+            enemy.attackVisualizer.Hide();
+        }
+
+        // 4. 실제 데미지 판정 실행
+        switch (enemy.speciesData.attackType)
+        {
+            case AttackPatternType.Buster: BusterAttack(); break;
+            case AttackPatternType.Wolf: WolfAttack(); break;
+            default: ExecuteAttack(); break;
+        }
+    }
     public void Exit()
     {
-
+        if(enemy.attackVisualizer != null)
+        {
+            enemy.attackVisualizer.Hide();
+        }
     }
 
 }

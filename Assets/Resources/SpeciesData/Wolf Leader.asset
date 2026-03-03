@@ -17,9 +17,11 @@ MonoBehaviour:
   aggression: 10
   maxHP: 200
   attackRange: 2
+  attackAngle: 90
+  indicatorColor: {r: 1, g: 0, b: 0, a: 0.3}
   NAttackDamage: 40
   SAttackDamage: 60
-  attackCooldown: 1.5
+  attackCooldown: 4
   patrolSpeed: 2
   chaseSpeed: 4
   detectionRadius: 8

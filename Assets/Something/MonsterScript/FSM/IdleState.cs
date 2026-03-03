@@ -1,3 +1,4 @@
+// Idle 상태에서의 행동과 로직을 담당하는 스크립트
 using UnityEngine;
 using System.Collections;
 
