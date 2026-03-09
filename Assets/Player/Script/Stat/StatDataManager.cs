@@ -231,4 +231,45 @@ public class StatDataManager : MonoBehaviour
             SaveData();
         }
     }
+
+
+    // [ContextMenu("🔄 JSON 파일 완전 초기화")]
+    // public void ResetJsonFile()
+    // {
+    //     // PlayerCurrentData의 모든 변수 초기화
+    //     playerData = new PlayerCurrentData();
+    //     playerData.playerLevel = 1;
+    //     playerData.currentExp = 0;
+    //     playerData.currentHP = Base_HP;
+    //     playerData.saved_PhyAtk = 0;
+    //     playerData.saved_MagAtk = 0;
+    //     playerData.saved_Def = 0;
+    //     playerData.saved_MaxHP = Base_HP;
+    //     playerData.saved_CritChance = 0;
+    //     playerData.saved_CritDmg = 1.5f;
+    //     playerData.saved_AtkSpeed = Base_AtkSpeed;
+    //     playerData.saved_MoveSpeed = Base_MoveSpeed;
+    //     playerData.saved_SkillCool = 1f;
+    //     playerData.saved_ItemCool = 1f;
+        
+    //     // JSON 파일에 저장
+    //     SaveData();
+        
+    //     Debug.Log($"✅ JSON 파일 초기화 완료!");
+    //     Debug.Log($"📍 경로: {filePath}");
+    // }
+
+    // [ContextMenu("📂 JSON 파일 경로 보기")]
+    // public void ShowFilePath()
+    // {
+    //     Debug.Log($"💾 JSON 파일 경로: {filePath}");
+    //     if (File.Exists(filePath))
+    //     {
+    //         Debug.Log($"✅ 파일 존재함");
+    //     }
+    //     else
+    //     {
+    //         Debug.Log($"❌ 파일 없음 (아직 게임 시작 후 종료되지 않음)");
+    //     }
+    // }
 }

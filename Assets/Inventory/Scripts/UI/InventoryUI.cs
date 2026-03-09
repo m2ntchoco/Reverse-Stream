@@ -1292,14 +1292,14 @@ public class InventoryUI : MonoBehaviour
             DeselectAllSlots();
             return;
         }
-        else if (info.item != null)
-        {
-            // ItemDataManager에 아이템 추가
-            if (ItemDataManager.Instance != null)
-            {
-                ItemDataManager.Instance.AddItem(info.item.id);
-            }
-        }
+        // else if (info.item != null)
+        // {
+        //     // ItemDataManager에 아이템 추가
+        //     if (ItemDataManager.Instance != null)
+        //     {
+        //         ItemDataManager.Instance.AddItem(info.item.id);
+        //     }
+        // }
 
         // 2. 일반 클릭
         DeselectAllSlots();
@@ -1441,6 +1441,7 @@ public class InventoryUI : MonoBehaviour
     {
         float physAtkPercent = (data.Final_PhyAtk / data.Base_Atk) * 100f;
         _statPhysAtk.text = $"{physAtkPercent:F0}%";
+        Debug.Log($"[UpdatePlayerStatLabels] 물리 공격력: Final={data.Final_PhyAtk}, Base={data.Base_Atk}, Percent={physAtkPercent}%");
     }
 
     // 마법 공격력
